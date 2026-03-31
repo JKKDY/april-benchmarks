@@ -1,0 +1,1 @@
+add_april_benchmark(argon_block argon_block.cpp)

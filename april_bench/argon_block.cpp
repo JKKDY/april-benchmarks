@@ -18,11 +18,10 @@ auto create_argon_environment(const size_t n_dim, const double density = 0.8442)
     // Calculate Dimensions
     const size_t total_particles = n_dim * n_dim * n_dim;
     const double volume = static_cast<double>(total_particles) / density;
-    double L = std::cbrt(volume);
+    const double L = std::cbrt(volume);
     const double spacing = L / static_cast<double>(n_dim);
-    L = L + spacing/2;
 
-    const vec3 origin = {-L / 2.0, -L / 2.0, -L / 2.0};
+    const vec3 origin = vec3{-L / 2.0} + vec3{spacing / 2.0};
     const auto extent = vec3{L, L, L};
 
     // Generate particles
@@ -213,9 +212,9 @@ int main() {
     // run_argon_bench_suite_no_rebuild(plan);
     // run_argon_bench_suite_rebuild(plan);
 
-    // auto threads = std::vector {1, 4, 8, 11, 16, 20, 24, 32, 48};
+    auto threads = std::vector {1, 2, 4, 8, 16};
 
-    for (auto i : generate_scaling_sequence(16)) {
+    for (auto i : threads) {
         struct:
 			RunTimeConfig<exec::Executor>,
 			CompileTimeConfig<ParallelPolicy::Threaded, VectorPolicy::Auto>
@@ -232,31 +231,30 @@ int main() {
        
         auto env = create_argon_environment(100, 0.8);
         auto container = LinkedCells<Layout::SoA>().with_absolute_skin(0.3);
-        auto container2 = LinkedCells<Layout::SoA>().with_absolute_skin(0.3).with_cell_ordering(hilbert_order);
+        // auto container2 = LinkedCells<Layout::SoA>().with_absolute_skin(0.3).with_cell_ordering(hilbert_order);
 
         // auto container = DirectSum();
        
-        std::cout << "SoA Linked Cells without ordering " << std::endl;
+        std::cout << "SoA Linked Cells with rebuild" << std::endl;
 
         run_simulation(
-           std::move(env),
-           std::move(container),
+           env,
+           container,
            cfg,
-           5, // warmup
-           200, // bench
-           0.000001 // dt
+           50, // warmup
+           500, // bench
+           0.005 // dt
        );
 
-        std::cout << "SoA Linked Cells with hilbert ordering" << std::endl;
+        std::cout << "SoA Linked Cells without rebuild" << std::endl;
 
         run_simulation(
-           std::move(env),
-           std::move(container2),
+           env,
+           container,
            cfg,
-           5, // warmup
-           200, // bench
+           50, // warmup
+           500, // bench
            0.000001 // dt
        );
-
     }
 }

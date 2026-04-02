@@ -1,0 +1,57 @@
+# ===================================================================
+# LAMMPS Argon Benchmark (Apples-to-Apples with APRIL MD)
+# ===================================================================
+
+# Variables expected from command line:
+# -var rho 0.8 
+# -var n 100 
+# -var steps 500
+
+units           lj
+atom_style      atomic
+
+# 1. Physics & Domain (Matched to APRIL)
+# Calculate box size based on N and density
+variable        N equal v_n*v_n*v_n
+variable        vol equal v_N/v_rho
+variable        L equal v_vol^(1.0/3.0)
+variable        half_L equal v_L/2.0
+
+# 2. Setup Box & Particles
+boundary        p p p
+region          domain block -${half_L} ${half_L} -${half_L} ${half_L} -${half_L} ${half_L} units box
+create_box      1 domain
+
+# Use Simple Cubic to match APRIL's ParticleCuboid
+lattice         sc ${rho}
+create_atoms    1 region domain
+
+mass            1 1.0
+
+# 3. Thermalization (Maxwell-Boltzmann at T=1.0)
+velocity        all create 1.0 87287 loop geom
+
+# 4. Forces & Neighbor Lists (Matched to APRIL)
+pair_style      lj/cut 2.5
+pair_coeff      1 1 1.0 1.0
+
+# Skin = 0.3, check every step (exactly what LinkedCells with skin=0.3 does)
+neighbor        0.3 bin
+neigh_modify    every 1 delay 0 check yes
+
+# 5. Integration
+fix             1 all nve
+timestep        0.005
+
+# 6. Output & Execution
+# Print thermo at the very end to avoid IO overhead
+thermo          ${steps}
+thermo_style    custom step temp pe ke etotal press
+
+# Warmup (10% of total steps)
+variable        warmup_steps equal round(v_steps*0.1)
+run             ${warmup_steps} post no
+
+# Actual Benchmark
+reset_timestep  0
+run             ${steps}

@@ -4,7 +4,7 @@
 #SBATCH -e %j.err
 #SBATCH --clusters=inter        # MANDATORY for cm4_inter
 #SBATCH -p cm4_inter           # Partition name
-#SBATCH -t 00:20:00            # Reduced to 20m for faster queue turnaround
+#SBATCH -t 00:60:00            # Reduced to 20m for faster queue turnaround
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1    # One application instance
 #SBATCH --cpus-per-task=32     # 32 logical cores

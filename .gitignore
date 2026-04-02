@@ -52,4 +52,6 @@
 CMakeSettings.json
 /loc.py
 
+*.err
+*.out
 

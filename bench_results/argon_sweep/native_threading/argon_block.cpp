@@ -1,4 +1,5 @@
 #include <april/april.hpp>
+#include <april/exec/executors/native_spin_executor.hpp>
 #include <cmath>
 #include <iostream>
 
@@ -54,22 +55,23 @@ struct Experiment {
 };
 
 
-std::vector<Experiment> plan_benchmarks(const double target_runtime_sec = 30.0, const double expected_mups_per_core = 2) {
+std::vector<Experiment> plan_benchmarks(const double target_runtime_sec = 10.0, const double expected_mups_per_core = 1) {
     const std::vector densities = {
         // 0.2,
         0.8,
         // 1.1
     };
     const std::vector<size_t> sizes = {
-        40,
-        60,
-        80,
-        // 100,
+        // 40,
+        // 60,
+        // 80,
+        100,
         // 140,
         // 170,
         // 200
     }; // 64k - 8M
-    const std::vector<size_t> threads = generate_scaling_sequence(exec::N_CPU_THREADS);
+    const std::vector<size_t> threads = generate_scaling_sequence(32);
+    // const std::vector<size_t> threads = {1,2,4,8,12,16,24,32};
 
     std::vector<Experiment> experiments;
 
@@ -82,15 +84,14 @@ std::vector<Experiment> plan_benchmarks(const double target_runtime_sec = 30.0, 
                 const double updates_per_sec = expected_mups_per_core * 1e6 * n_threads;
                 size_t steps = static_cast<size_t>((target_runtime_sec * updates_per_sec) / n_particles);
 
-                // 2. THE VERLET TRAP: Apply Safety Clamps
-                // We need at least X steps to ensure the Verlet Skin actually triggers
+                // We need at least some number of steps to ensure the Verlet Skin actually triggers
                 // a few rebuilds. If we run 5 steps, we aren't testing the full engine.
-                if (steps < 100) steps = 100;    // Floor
-                if (steps > 5000) steps = 10000;  // Ceiling (prevents tiny systems from running forever)
+                if (steps < 30) steps = 30;    // Floor
+                if (steps > 5000) steps = 5000;  // Ceiling (prevents tiny systems from running forever)
 
                 // Skip serial/low-thread runs for massive systems
                 const double expected_run_time = steps * n_particles / updates_per_sec;
-                if (expected_run_time > 4 * target_runtime_sec) continue;
+                // if (expected_run_time > 4 * target_runtime_sec) continue;
 
                 // Create experiment label
                 const std::string label = "rho" + std::to_string(rho).substr(0, 4) +
@@ -105,10 +106,8 @@ std::vector<Experiment> plan_benchmarks(const double target_runtime_sec = 30.0, 
 
 
 
-/**
- * @brief Executes a pre-planned list of Argon benchmarks.
- */
-void run_argon_bench_suite(const std::vector<Experiment>& experiments) {
+
+void run_argon_bench_suiteOMP(const std::vector<Experiment>& experiments) {
     namespace fs = std::filesystem;
 
     // file system setup
@@ -117,8 +116,10 @@ void run_argon_bench_suite(const std::vector<Experiment>& experiments) {
     const fs::path master_csv = suite_dir / "master_results.csv";
     fs::create_directories(suite_dir);
 
+    std::cout << "packed size: " << std::to_string(sizeof(april::packed)) << std::endl;
+
     std::cout << "================================================\n";
-    std::cout << " SUITE STARTING: " << suite_dir.string() << "\n";
+    std::cout << " SOA SUITE STARTING: " << suite_dir.string() << "\n";
     std::cout << " RUNNING " << experiments.size() << " EXPERIMENTS\n";
     std::cout << "================================================\n";
 
@@ -134,7 +135,7 @@ void run_argon_bench_suite(const std::vector<Experiment>& experiments) {
         cfg.executer_config.n_threads = t;
 
         auto env = create_argon_environment(n, rho);
-        auto container = LinkedCells<Layout::AoSoA<>>().with_absolute_skin(0.3);
+        auto container = LinkedCells<Layout::SoA>().with_absolute_skin(0.3);
 
         // run
         auto result = run_simulation(
@@ -156,9 +157,64 @@ void run_argon_bench_suite(const std::vector<Experiment>& experiments) {
 }
 
 
+void run_argon_bench_suiteNative(const std::vector<Experiment>& experiments) {
+    namespace fs = std::filesystem;
+
+    // file system setup
+    const fs::path root_dir = fs::path(PROJECT_SOURCE_DIR) / "bench_results/argon_sweep";
+    const fs::path suite_dir = get_next_run_directory(root_dir);
+    const fs::path master_csv = suite_dir / "master_results.csv";
+    fs::create_directories(suite_dir);
+
+    std::cout << "packed size: " << std::to_string(sizeof(april::packed)) << std::endl;
+
+    std::cout << "================================================\n";
+    std::cout << " SOA SUITE STARTING: " << suite_dir.string() << "\n";
+    std::cout << " RUNNING " << experiments.size() << " EXPERIMENTS\n";
+    std::cout << "================================================\n";
+
+
+    for (size_t i = 0; i < experiments.size(); ++i) {
+        const auto& [rho, n, t, steps, label] = experiments[i];
+
+        std::cout << "[" << i + 1 << "/" << experiments.size() << "] "
+                  << label << " (N=" << n << ", T=" << t << ", Steps=" << steps << ")" << std::endl;
+
+        // setup
+        struct :
+			RunTimeConfig<exec::NativeSpinExecutor>,
+			CompileTimeConfig<ParallelPolicy::Threaded, VectorPolicy::Auto>
+		{} cfg;
+        cfg.executer_config.n_threads = t;
+
+        auto env = create_argon_environment(n, rho);
+        auto container = LinkedCells<Layout::SoA>().with_absolute_skin(0.3);
+
+        // run
+        auto result = run_simulation(
+            env,
+            container,
+            cfg,
+            steps / 10, // warmup
+            steps, // bench
+            0.005
+        );
+
+        // save results
+        save_bench_to_csv(master_csv, label, t, result);
+    }
+
+    std::cout << "================================================\n";
+    std::cout << " SUITE COMPLETE -> " << master_csv.string() << "\n";
+    std::cout << "================================================\n";
+}
+
+
+
 int main() {
     const auto plan = plan_benchmarks();
-    run_argon_bench_suite(plan);
+    run_argon_bench_suiteOMP(plan);
+    run_argon_bench_suiteNative(plan);
 
    //  ExecutionConfig cfg;
    //  cfg.executer_config.n_threads = 6;
@@ -174,7 +230,7 @@ int main() {
    //     25, // warmup
    //     5000, // bench
    //     0.005, // d
-   //     true, // No binary output during benchmark
+   //     false, // No binary output during benchmark
    //     "/mnt/d/Dev/april/animation/output"
    // );
 }

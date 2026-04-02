@@ -25,7 +25,7 @@ FetchContent_MakeAvailable(April)
 # BENCHMARK CONFIGURATION TARGET
 # We create an INTERFACE library to hold all benchmark-specific flags and links
 add_library(AprilBench_configs INTERFACE
-        april-bench/utils.hpp
+        april_bench/utils.hpp
 )
 target_compile_features(AprilBench_configs INTERFACE cxx_std_23)
 
@@ -70,4 +70,4 @@ endfunction()
 # SUBDIRECTORIES
 # ------------------------------------------------------------------------------
 # Hand over to the folder containing your benchmark cpp files
-add_subdirectory(april-bench)
+add_subdirectory(april_bench)

@@ -1,2 +1,6 @@
---- Running LAMMPS KOKKOS: T=1, N=100, Rho=0.8 ---
-LAMMPS (22 Jul 2025 - Update 3)
+--- Running LAMMPS INTEL: Cores=32 (MPI=32, OMP=2), N=100, Rho=0.8 ---
+Unloading lrz_setup/1.0 <H:S>
+  ERROR: Unload of sticky module skipped
+
+Unloading tempdir/2.0 <aL:H:S>
+  ERROR: Unload of sticky module skipped

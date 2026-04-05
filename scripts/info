@@ -19,3 +19,6 @@ srun -M cm4 -p cm4_tiny -n 1 -c 32 --hint=nomultithread --cpu-bind=cores --pty b
 
 get a whole node: 
 srun -M inter -p cm4_inter --exclusive -N 1 --pty bash
+
+
+see what threads are pinned to our task:  taskset -cp $$

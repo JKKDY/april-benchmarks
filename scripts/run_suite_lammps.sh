@@ -2,7 +2,8 @@
 # --- CoolMUC-4 Environment Setup ---
 module load intel
 module load intel-mkl
-module load intel-oneapi-tbb/2021.13.1
+module load intel-mpi
+module load intel-oneapi-tbb
 module load gcc/14.2.0
 module load cmake
 module load ninja
@@ -14,8 +15,9 @@ BENCH_DIR="${PROJECT_ROOT}/lammps_bench"
 OUTPUT_CSV="${PROJECT_ROOT}/bench_results/lammps_results.csv"
 
 # --- Benchmark Settings ---
-BACKENDS=("intel" "kokkos")
-THREADS=(1 2 4 8 16)
+# BACKENDS=("intel" "kokkos")
+BACKENDS=("intel")
+THREADS=(1 2 4 8 16 24 32)
 N_DIM=100
 RHO=0.8
 STEPS=500

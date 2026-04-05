@@ -212,49 +212,105 @@ int main() {
     // run_argon_bench_suite_no_rebuild(plan);
     // run_argon_bench_suite_rebuild(plan);
 
-    auto threads = std::vector {1, 2, 4, 8, 16};
+    auto threads = generate_scaling_sequence(32);
+    std::vector data = {2};
 
-    for (auto i : threads) {
+    // for (int i = threads.size() / 2 + 1; i < threads.size(); i++) {
+    //     auto t = threads[i];
+
+    //     struct:
+	// 		RunTimeConfig<exec::Executor>,
+	// 		CompileTimeConfig<ParallelPolicy::Threaded, VectorPolicy::Auto>
+	// 	{} cfg;
+    //     cfg.executer_config.n_threads = t;
+
+    //     struct:
+	// 		RunTimeConfig<exec::Executor>,
+	// 		CompileTimeConfig<ParallelPolicy::Threaded, VectorPolicy::Scalar>
+	// 	{} cfg2;
+    //     cfg2.executer_config.n_threads = t;
+    
+    //     std::cout << "num threads: " <<cfg.executer_config.n_threads << std::endl;
+       
+    //     auto env = create_argon_environment(100, 0.8);
+    //     auto container = LinkedCells<Layout::SoA>().with_absolute_skin(0.3);
+    //     // auto container2 = LinkedCells<Layout::SoA>().with_absolute_skin(0.3).with_cell_ordering(hilbert_order);
+
+    //     // auto container = DirectSum();
+       
+    //     std::cout << "1M SoA Linked Cells with rebuild" << std::endl;
+        
+    //     run_simulation(
+    //         env,
+    //         container,
+    //         cfg,
+    //         50, // warmup
+    //         500, // bench
+    //         0.005 // dt
+    //     );
+        
+    //     std::cout << "1M SoA Linked Cells without rebuild" << std::endl;
+ 
+    //     run_simulation(
+    //        env,
+    //        container,
+    //        cfg,
+    //        200, // warmup
+    //        500, // bench
+    //        0.000001 // dt
+    //    );
+    // }
+
+    std::cout << "Cell ordering: Hilbert" << std::endl;
+
+    for (int i : data) {
+        int t = 32;
         struct:
-			RunTimeConfig<exec::Executor>,
-			CompileTimeConfig<ParallelPolicy::Threaded, VectorPolicy::Auto>
-		{} cfg;
-        cfg.executer_config.n_threads = i;
+            RunTimeConfig<exec::Executor>,
+            CompileTimeConfig<ParallelPolicy::Threaded, VectorPolicy::Auto>
+        {} cfg;
+        cfg.executer_config.n_threads = t;
 
         struct:
-			RunTimeConfig<exec::Executor>,
-			CompileTimeConfig<ParallelPolicy::Threaded, VectorPolicy::Scalar>
-		{} cfg2;
-        cfg2.executer_config.n_threads = i;
+            RunTimeConfig<exec::Executor>,
+            CompileTimeConfig<ParallelPolicy::Threaded, VectorPolicy::Scalar>
+        {} cfg2;
+        cfg2.executer_config.n_threads = t;
     
         std::cout << "num threads: " <<cfg.executer_config.n_threads << std::endl;
-       
+
+        std::cout << "block size:  " << i << std::endl;
+
+        
         auto env = create_argon_environment(100, 0.8);
-        auto container = LinkedCells<Layout::SoA>().with_absolute_skin(0.3);
+        auto container = LinkedCells<Layout::SoA>()
+            .with_absolute_skin(0.3)
+            .with_cell_ordering(hilbert_order)
+            .with_block_size(i);
         // auto container2 = LinkedCells<Layout::SoA>().with_absolute_skin(0.3).with_cell_ordering(hilbert_order);
 
         // auto container = DirectSum();
-       
-        std::cout << "SoA Linked Cells with rebuild" << std::endl;
-
+        
+        std::cout << "1M SoA Linked Cells with rebuild" << std::endl;
+        
         run_simulation(
-           env,
-           container,
-           cfg,
-           50, // warmup
-           500, // bench
-           0.005 // dt
-       );
-
-        std::cout << "SoA Linked Cells without rebuild" << std::endl;
-
+            env,
+            container,
+            cfg,
+            50, // warmup
+            500, // bench
+            0.005 // dt
+        );
+        
+        std::cout << "1M SoA Linked Cells without rebuild" << std::endl;
+    
         run_simulation(
-           env,
-           container,
-           cfg,
-           50, // warmup
-           500, // bench
-           0.000001 // dt
-       );
+            env,
+            container,
+            cfg,
+            200, // warmup
+            500, // bench
+            0.000001 // dt
+        );
     }
 }

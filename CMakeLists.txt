@@ -17,7 +17,7 @@ set(APRIL_BUILD_BENCHMARKS OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
         April
         GIT_REPOSITORY https://github.com/JKKDY/april.git
-        GIT_TAG dev
+        GIT_TAG perf/improve-lc-rebuild
 )
 FetchContent_MakeAvailable(April)
 

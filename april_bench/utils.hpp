@@ -26,7 +26,7 @@ Benchmark::BenchmarkResult run_simulation(
 
     // Warm-up (Silent)
     VelocityVerlet warmup_integrator(system, monitors<>);
-    warmup_integrator.run_for_steps(dt, warmup_steps);
+    warmup_integrator.run_for_steps(0.005, warmup_steps);
 
     // Benchmark Preparation
     Benchmark::BenchmarkResult res;

@@ -3,6 +3,7 @@ set -e
 
 # 1. CoolMUC-4 Environment Setup
 module load intel
+module load intel-mpi
 module load intel-mkl
 module load intel-oneapi-tbb
 module load cmake
@@ -20,9 +21,9 @@ cd "${LAMMPS_DIR}/build_intel"
 
 # Use Ninja for faster builds (-G Ninja)
 cmake ../cmake -G Ninja \
-  -D CMAKE_C_COMPILER=icx \
-  -D CMAKE_CXX_COMPILER=icpx \
-  -D BUILD_MPI=no \
+  -D CMAKE_C_COMPILER=mpiicx \
+  -D CMAKE_CXX_COMPILER=mpiicpx \
+  -D BUILD_MPI=yes \
   -D BUILD_OMP=yes \
   -D PKG_INTEL=yes \
   -D PKG_OPENMP=yes \

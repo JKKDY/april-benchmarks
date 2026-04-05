@@ -27,9 +27,11 @@ ninja -j "$SLURM_CPUS_PER_TASK"
 
 # 4. Run Benchmark
 echo "--- Starting Benchmark ---"
-export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+# export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+export OMP_NUM_THREADS=32
 export OMP_PLACES=cores
 export OMP_PROC_BIND=close
 export OMP_DISPLAY_ENV=VERBOSE
 
 numactl --localalloc ./april_bench/argon_block
+# numactl --cpunodebind=0 --membind=0 ./april_bench/argon_block

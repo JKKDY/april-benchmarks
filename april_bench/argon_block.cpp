@@ -1,9 +1,13 @@
 #include <april/april.hpp>
-#include <april/exec/executors/native_spin_executor.hpp>
 #include <cmath>
 #include <iostream>
-
+#include <string>
 #include "utils.hpp"
+
+namespace april::exec {
+    class NativeBarrierExecutor;
+}
+
 using namespace april;
 
 
@@ -45,272 +49,331 @@ auto create_argon_environment(const size_t n_dim, const double density = 0.8442)
 
 
 
-struct Experiment {
-    double rho;
-    size_t n;
-    size_t t;
-    size_t steps;
-    std::string label;
+auto argon_block = []<typename Layout, typename ExecutorType>(
+    int argc, char* argv[], const ExecutionArgs& args, auto schedule)
+{
+    const int n = std::stoi(argv[1]);
+    const double rho = std::stod(argv[2]);
+
+    auto env = create_argon_environment(n, rho);
+
+    auto container = LinkedCells<Layout>()
+        .with_absolute_skin(0.3)
+        .with_block_size(args.block_size)
+        .with_scheduling(schedule)
+        .with_cell_ordering(hilbert_order);
+
+    struct:
+        RunTimeConfig<ExecutorType>,
+        CompileTimeConfig<ParallelPolicy::Threaded, VectorPolicy::Auto>
+    {} cfg;
+    cfg.executer_config.n_threads = args.t;
+
+    auto bench = run_simulation(env, container, cfg, args.steps / 10, args.steps, args.dt,  true, "/mnt/d/dev/april/animation/output");
+
+    std::string label = std::format("Argon_n{}_rho{}_{}_{}_{}_{}x{}x{}",
+        n, rho, args.layout, args.executor, args.schedule,
+        args.block_size.x, args.block_size.y, args.block_size.z);
+
+    const fs::path root_dir = fs::path(PROJECT_SOURCE_DIR) / "april_bench/results/argon";
+    if (!fs::exists(root_dir)) fs::create_directories(root_dir);
+
+    save_bench_to_csv(root_dir / "argon_block.csv", label, args.t, bench);
 };
 
 
-std::vector<Experiment> plan_benchmarks(const double target_runtime_sec = 10.0, const double expected_mups_per_core = 1) {
-    const std::vector densities = {
-        // 0.2,
-        0.8,
-        // 1.1
-    };
-    const std::vector<size_t> sizes = {
-        // 40,
-        // 60,
-        // 80,
-        100,
-        // 140,
-        // 170,
-        // 200
-    }; // 64k - 8M
-    const std::vector<size_t> threads = generate_scaling_sequence(32);
-    // const std::vector<size_t> threads = {1,2,4,8,12,16,24,32};
 
-    std::vector<Experiment> experiments;
 
-    for (const double rho : densities) {
-        for (const size_t size : sizes) {
-            for (const size_t n_threads : threads) {
-
-                const size_t n_particles = size * size * size;
-
-                const double updates_per_sec = expected_mups_per_core * 1e6 * n_threads;
-                size_t steps = static_cast<size_t>((target_runtime_sec * updates_per_sec) / n_particles);
-
-                // We need at least some number of steps to ensure the Verlet Skin actually triggers
-                // a few rebuilds. If we run 5 steps, we aren't testing the full engine.
-                if (steps < 30) steps = 30;    // Floor
-                if (steps > 5000) steps = 5000;  // Ceiling (prevents tiny systems from running forever)
-
-                // // Skip serial/low-thread runs for massive systems
-                const double expected_run_time = steps * n_particles / updates_per_sec;
-                // if (expected_run_time > 4 * target_runtime_sec) continue;
-                    
-                // Create experiment label
-                const std::string label = "rho" + std::to_string(rho).substr(0, 4) +
-                                    "_n" + std::to_string(size) + "_t" + std::to_string(n_threads);
-
-                experiments.push_back({rho, size, n_threads, steps, label});
-            }
-        }
-    }
-    return experiments;
+int main(const int argc, char* argv[]) {
+    run_benchmark(argc, argv, 2, argon_block);
+    return 0;
 }
 
 
 
 
-void run_argon_bench_suite_no_rebuild(const std::vector<Experiment>& experiments) {
-    namespace fs = std::filesystem;
-
-    // file system setup
-    const fs::path root_dir = fs::path(PROJECT_SOURCE_DIR) / "bench_results/argon_sweep";
-    const fs::path suite_dir = get_next_run_directory(root_dir);
-    const fs::path master_csv = suite_dir / "master_results.csv";
-    fs::create_directories(suite_dir);
-
-    std::cout << "packed size: " << std::to_string(sizeof(april::packed)) << std::endl;
-
-    std::cout << "================================================\n";
-    std::cout << " NO REBUILD SUITE STARTING: " << suite_dir.string() << "\n";
-    std::cout << " RUNNING " << experiments.size() << " EXPERIMENTS\n";
-    std::cout << "================================================\n";
-
-
-    for (size_t i = 0; i < experiments.size(); ++i) {
-        const auto& [rho, n, t, steps, label] = experiments[i];
-
-        std::cout << "[" << i + 1 << "/" << experiments.size() << "] "
-                  << label << " (N=" << n << ", T=" << t << ", Steps=" << steps << ")" << std::endl;
-
-        // setup
-        ExecutionConfig cfg;
-        cfg.executer_config.n_threads = t;
-
-        auto env = create_argon_environment(n, rho);
-        auto container = LinkedCells<Layout::SoA>().with_absolute_skin(0.3);
-
-        // run
-        auto result = run_simulation(
-            env,
-            container,
-            cfg,
-            steps / 10, // warmup
-            steps, // bench
-            0.000000001
-        );
-
-        // save results
-        save_bench_to_csv(master_csv, label, t, result);
-    }
-
-    std::cout << "================================================\n";
-    std::cout << " SUITE COMPLETE -> " << master_csv.string() << "\n";
-    std::cout << "================================================\n";
-}
-
-void run_argon_bench_rebuild(const std::vector<Experiment>& experiments) {
-    namespace fs = std::filesystem;
-
-    // file system setup
-    const fs::path root_dir = fs::path(PROJECT_SOURCE_DIR) / "bench_results/argon_sweep";
-    const fs::path suite_dir = get_next_run_directory(root_dir);
-    const fs::path master_csv = suite_dir / "master_results.csv";
-    fs::create_directories(suite_dir);
-
-    std::cout << "packed size: " << std::to_string(sizeof(april::packed)) << std::endl;
-
-    std::cout << "================================================\n";
-    std::cout << " REBUILD SUITE STARTING: " << suite_dir.string() << "\n";
-    std::cout << " RUNNING " << experiments.size() << " EXPERIMENTS\n";
-    std::cout << "================================================\n";
-
-
-    for (size_t i = 0; i < experiments.size(); ++i) {
-        const auto& [rho, n, t, steps, label] = experiments[i];
-
-        std::cout << "[" << i + 1 << "/" << experiments.size() << "] "
-                  << label << " (N=" << n << ", T=" << t << ", Steps=" << steps << ")" << std::endl;
-
-        // setup
-        ExecutionConfig cfg;
-        cfg.executer_config.n_threads = t;
-
-        auto env = create_argon_environment(n, rho);
-        auto container = LinkedCells<Layout::SoA>().with_absolute_skin(0.0);
-
-        // run
-        auto result = run_simulation(
-            env,
-            container,
-            cfg,
-            steps / 10, // warmup
-            steps, // bench
-            0.005
-        );
-
-        // save results
-        save_bench_to_csv(master_csv, label, t, result);
-    }
-
-    std::cout << "================================================\n";
-    std::cout << " SUITE COMPLETE -> " << master_csv.string() << "\n";
-    std::cout << "================================================\n";
-}
 
 
 
-
-int main() {
-    // const auto plan = plan_benchmarks();
-    // run_argon_bench_suite_no_rebuild(plan);
-    // run_argon_bench_suite_rebuild(plan);
-
-    auto threads = generate_scaling_sequence(32);
-    std::vector data = {2};
-
-    // for (int i = threads.size() / 2 + 1; i < threads.size(); i++) {
-    //     auto t = threads[i];
-
-    //     struct:
-	// 		RunTimeConfig<exec::Executor>,
-	// 		CompileTimeConfig<ParallelPolicy::Threaded, VectorPolicy::Auto>
-	// 	{} cfg;
-    //     cfg.executer_config.n_threads = t;
-
-    //     struct:
-	// 		RunTimeConfig<exec::Executor>,
-	// 		CompileTimeConfig<ParallelPolicy::Threaded, VectorPolicy::Scalar>
-	// 	{} cfg2;
-    //     cfg2.executer_config.n_threads = t;
-    
-    //     std::cout << "num threads: " <<cfg.executer_config.n_threads << std::endl;
-       
-    //     auto env = create_argon_environment(100, 0.8);
-    //     auto container = LinkedCells<Layout::SoA>().with_absolute_skin(0.3);
-    //     // auto container2 = LinkedCells<Layout::SoA>().with_absolute_skin(0.3).with_cell_ordering(hilbert_order);
-
-    //     // auto container = DirectSum();
-       
-    //     std::cout << "1M SoA Linked Cells with rebuild" << std::endl;
-        
-    //     run_simulation(
-    //         env,
-    //         container,
-    //         cfg,
-    //         50, // warmup
-    //         500, // bench
-    //         0.005 // dt
-    //     );
-        
-    //     std::cout << "1M SoA Linked Cells without rebuild" << std::endl;
- 
-    //     run_simulation(
-    //        env,
-    //        container,
-    //        cfg,
-    //        200, // warmup
-    //        500, // bench
-    //        0.000001 // dt
-    //    );
-    // }
-
-    std::cout << "Cell ordering: Hilbert" << std::endl;
-
-    for (int i : data) {
-        int t = 32;
-        struct:
-            RunTimeConfig<exec::Executor>,
-            CompileTimeConfig<ParallelPolicy::Threaded, VectorPolicy::Auto>
-        {} cfg;
-        cfg.executer_config.n_threads = t;
-
-        struct:
-            RunTimeConfig<exec::Executor>,
-            CompileTimeConfig<ParallelPolicy::Threaded, VectorPolicy::Scalar>
-        {} cfg2;
-        cfg2.executer_config.n_threads = t;
-    
-        std::cout << "num threads: " <<cfg.executer_config.n_threads << std::endl;
-
-        std::cout << "block size:  " << i << std::endl;
-
-        
-        auto env = create_argon_environment(100, 0.8);
-        auto container = LinkedCells<Layout::SoA>()
-            .with_absolute_skin(0.3)
-            .with_cell_ordering(hilbert_order)
-            .with_block_size(i);
-        // auto container2 = LinkedCells<Layout::SoA>().with_absolute_skin(0.3).with_cell_ordering(hilbert_order);
-
-        // auto container = DirectSum();
-        
-        std::cout << "1M SoA Linked Cells with rebuild" << std::endl;
-        
-        run_simulation(
-            env,
-            container,
-            cfg,
-            50, // warmup
-            500, // bench
-            0.005 // dt
-        );
-        
-        std::cout << "1M SoA Linked Cells without rebuild" << std::endl;
-    
-        run_simulation(
-            env,
-            container,
-            cfg,
-            200, // warmup
-            500, // bench
-            0.000001 // dt
-        );
-    }
-}
+//
+//
+//
+//
+// struct Experiment {
+//     double rho;
+//     size_t n;
+//     size_t t;
+//     size_t steps;
+//     std::string label;
+// };
+//
+//
+// std::vector<Experiment> plan_benchmarks(const double target_runtime_sec = 10.0, const double expected_mups_per_core = 1) {
+//     const std::vector densities = {
+//         // 0.2,
+//         0.8,
+//         // 1.1
+//     };
+//     const std::vector<size_t> sizes = {
+//         // 40,
+//         // 60,
+//         // 80,
+//         100,
+//         // 140,
+//         // 170,
+//         // 200
+//     }; // 64k - 8M
+//     const std::vector<size_t> threads = generate_scaling_sequence(32);
+//     // const std::vector<size_t> threads = {1,2,4,8,12,16,24,32};
+//
+//     std::vector<Experiment> experiments;
+//
+//     for (const double rho : densities) {
+//         for (const size_t size : sizes) {
+//             for (const size_t n_threads : threads) {
+//
+//                 const size_t n_particles = size * size * size;
+//
+//                 const double updates_per_sec = expected_mups_per_core * 1e6 * n_threads;
+//                 size_t steps = static_cast<size_t>((target_runtime_sec * updates_per_sec) / n_particles);
+//
+//                 // We need at least some number of steps to ensure the Verlet Skin actually triggers
+//                 // a few rebuilds. If we run 5 steps, we aren't testing the full engine.
+//                 if (steps < 30) steps = 30;    // Floor
+//                 if (steps > 5000) steps = 5000;  // Ceiling (prevents tiny systems from running forever)
+//
+//                 // // Skip serial/low-thread runs for massive systems
+//                 const double expected_run_time = steps * n_particles / updates_per_sec;
+//                 // if (expected_run_time > 4 * target_runtime_sec) continue;
+//
+//                 // Create experiment label
+//                 const std::string label = "rho" + std::to_string(rho).substr(0, 4) +
+//                                     "_n" + std::to_string(size) + "_t" + std::to_string(n_threads);
+//
+//                 experiments.push_back({rho, size, n_threads, steps, label});
+//             }
+//         }
+//     }
+//     return experiments;
+// }
+//
+//
+//
+//
+//
+//
+// template<Layout L>
+// auto create_system() {
+//
+// }
+//
+//
+//
+// void run_argon_bench_suite_no_rebuild(const std::vector<Experiment>& experiments) {
+//     namespace fs = std::filesystem;
+//
+//     // file system setup
+//     const fs::path root_dir = fs::path(PROJECT_SOURCE_DIR) / "bench_results/argon_sweep";
+//     const fs::path suite_dir = get_next_run_directory(root_dir);
+//     const fs::path master_csv = suite_dir / "master_results.csv";
+//     fs::create_directories(suite_dir);
+//
+//     std::cout << "packed size: " << std::to_string(sizeof(april::packed)) << std::endl;
+//
+//     std::cout << "================================================\n";
+//     std::cout << " NO REBUILD SUITE STARTING: " << suite_dir.string() << "\n";
+//     std::cout << " RUNNING " << experiments.size() << " EXPERIMENTS\n";
+//     std::cout << "================================================\n";
+//
+//
+//     for (size_t i = 0; i < experiments.size(); ++i) {
+//         const auto& [rho, n, t, steps, label] = experiments[i];
+//
+//         std::cout << "[" << i + 1 << "/" << experiments.size() << "] "
+//                   << label << " (N=" << n << ", T=" << t << ", Steps=" << steps << ")" << std::endl;
+//
+//         // setup
+//         ExecutionConfig cfg;
+//         cfg.executer_config.n_threads = t;
+//
+//         auto env = create_argon_environment(n, rho);
+//         auto container = LinkedCells<Layout::SoA>().with_absolute_skin(0.3);
+//
+//         // run
+//         auto result = run_simulation(
+//             env,
+//             container,
+//             cfg,
+//             steps / 10, // warmup
+//             steps, // bench
+//             0.000000001
+//         );
+//
+//         // save results
+//         save_bench_to_csv(master_csv, label, t, result);
+//     }
+//
+//     std::cout << "================================================\n";
+//     std::cout << " SUITE COMPLETE -> " << master_csv.string() << "\n";
+//     std::cout << "================================================\n";
+// }
+//
+// void run_argon_bench_rebuild(const std::vector<Experiment>& experiments) {
+//     namespace fs = std::filesystem;
+//
+//     // file system setup
+//     const fs::path root_dir = fs::path(PROJECT_SOURCE_DIR) / "bench_results/argon_sweep";
+//     const fs::path suite_dir = get_next_run_directory(root_dir);
+//     const fs::path master_csv = suite_dir / "master_results.csv";
+//     fs::create_directories(suite_dir);
+//
+//     std::cout << "packed size: " << std::to_string(sizeof(april::packed)) << std::endl;
+//
+//     std::cout << "================================================\n";
+//     std::cout << " REBUILD SUITE STARTING: " << suite_dir.string() << "\n";
+//     std::cout << " RUNNING " << experiments.size() << " EXPERIMENTS\n";
+//     std::cout << "================================================\n";
+//
+//
+//     for (size_t i = 0; i < experiments.size(); ++i) {
+//         const auto& [rho, n, t, steps, label] = experiments[i];
+//
+//         std::cout << "[" << i + 1 << "/" << experiments.size() << "] "
+//                   << label << " (N=" << n << ", T=" << t << ", Steps=" << steps << ")" << std::endl;
+//
+//         // setup
+//         ExecutionConfig cfg;
+//         cfg.executer_config.n_threads = t;
+//
+//         auto env = create_argon_environment(n, rho);
+//         auto container = LinkedCells<Layout::SoA>().with_absolute_skin(0.0);
+//
+//         // run
+//         auto result = run_simulation(
+//             env,
+//             container,
+//             cfg,
+//             steps / 10, // warmup
+//             steps, // bench
+//             0.005
+//         );
+//
+//         // save results
+//         save_bench_to_csv(master_csv, label, t, result);
+//     }
+//
+//     std::cout << "================================================\n";
+//     std::cout << " SUITE COMPLETE -> " << master_csv.string() << "\n";
+//     std::cout << "================================================\n";
+// }
+//
+//
+//
+//
+// int main() {
+//     // const auto plan = plan_benchmarks();
+//     // run_argon_bench_suite_no_rebuild(plan);
+//     // run_argon_bench_suite_rebuild(plan);
+//
+//     auto threads = generate_scaling_sequence(32);
+//     std::vector data = {2};
+//
+//     // for (int i = threads.size() / 2 + 1; i < threads.size(); i++) {
+//     //     auto t = threads[i];
+//
+//     //     struct:
+// 	// 		RunTimeConfig<exec::Executor>,
+// 	// 		CompileTimeConfig<ParallelPolicy::Threaded, VectorPolicy::Auto>
+// 	// 	{} cfg;
+//     //     cfg.executer_config.n_threads = t;
+//
+//     //     struct:
+// 	// 		RunTimeConfig<exec::Executor>,
+// 	// 		CompileTimeConfig<ParallelPolicy::Threaded, VectorPolicy::Scalar>
+// 	// 	{} cfg2;
+//     //     cfg2.executer_config.n_threads = t;
+//
+//     //     std::cout << "num threads: " <<cfg.executer_config.n_threads << std::endl;
+//
+//     //     auto env = create_argon_environment(100, 0.8);
+//     //     auto container = LinkedCells<Layout::SoA>().with_absolute_skin(0.3);
+//     //     // auto container2 = LinkedCells<Layout::SoA>().with_absolute_skin(0.3).with_cell_ordering(hilbert_order);
+//
+//     //     // auto container = DirectSum();
+//
+//     //     std::cout << "1M SoA Linked Cells with rebuild" << std::endl;
+//
+//     //     run_simulation(
+//     //         env,
+//     //         container,
+//     //         cfg,
+//     //         50, // warmup
+//     //         500, // bench
+//     //         0.005 // dt
+//     //     );
+//
+//     //     std::cout << "1M SoA Linked Cells without rebuild" << std::endl;
+//
+//     //     run_simulation(
+//     //        env,
+//     //        container,
+//     //        cfg,
+//     //        200, // warmup
+//     //        500, // bench
+//     //        0.000001 // dt
+//     //    );
+//     // }
+//
+//     std::cout << "Cell ordering: Hilbert" << std::endl;
+//
+//     for (int i : data) {
+//         int t = 32;
+//         struct:
+//             RunTimeConfig<exec::Executor>,
+//             CompileTimeConfig<ParallelPolicy::Threaded, VectorPolicy::Auto>
+//         {} cfg;
+//         cfg.executer_config.n_threads = t;
+//
+//         struct:
+//             RunTimeConfig<exec::Executor>,
+//             CompileTimeConfig<ParallelPolicy::Threaded, VectorPolicy::Scalar>
+//         {} cfg2;
+//         cfg2.executer_config.n_threads = t;
+//
+//         std::cout << "num threads: " <<cfg.executer_config.n_threads << std::endl;
+//
+//         std::cout << "block size:  " << i << std::endl;
+//
+//
+//         auto env = create_argon_environment(100, 0.8);
+//         auto container = LinkedCells<Layout::SoA>()
+//             .with_absolute_skin(0.3)
+//             .with_cell_ordering(hilbert_order)
+//             .with_block_size(i);
+//         // auto container2 = LinkedCells<Layout::SoA>().with_absolute_skin(0.3).with_cell_ordering(hilbert_order);
+//
+//         // auto container = DirectSum();
+//
+//         std::cout << "1M SoA Linked Cells with rebuild" << std::endl;
+//
+//         run_simulation(
+//             env,
+//             container,
+//             cfg,
+//             50, // warmup
+//             500, // bench
+//             0.005 // dt
+//         );
+//
+//         std::cout << "1M SoA Linked Cells without rebuild" << std::endl;
+//
+//         run_simulation(
+//             env,
+//             container,
+//             cfg,
+//             200, // warmup
+//             500, // bench
+//             0.000001 // dt
+//         );
+//     }
+// }

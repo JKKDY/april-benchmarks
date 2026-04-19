@@ -69,7 +69,7 @@ auto argon_block = []<typename Layout, typename ExecutorType>(
     {} cfg;
     cfg.executer_config.n_threads = args.t;
 
-    auto bench = run_simulation(env, container, cfg, args.steps / 10, args.steps, args.dt,  true, "/mnt/d/dev/april/animation/output");
+    auto bench = run_simulation(env, container, cfg, args.steps / 10, args.steps, args.dt);
 
     std::string label = std::format("Argon_n{}_rho{}_{}_{}_{}_{}x{}x{}",
         n, rho, args.layout, args.executor, args.schedule,

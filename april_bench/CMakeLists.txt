@@ -1,5 +1,4 @@
 add_april_benchmark(argon_block argon_block.cpp)
 add_april_benchmark(blast_wave blast_wave.cpp)
-add_april_benchmark(damn_break damn_break.cpp)
 add_april_benchmark(force_kernel_bench force_kernel_bench.cpp)
 add_april_benchmark(april_vs_hardcoded april_vs_hardcoded.cpp)

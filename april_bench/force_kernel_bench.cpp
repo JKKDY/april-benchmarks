@@ -322,8 +322,6 @@ static void BM_Manual_RealisticVectorRead(benchmark::State& state) {
         }
         benchmark::DoNotOptimize(acc);
     }
-    state.SetItemsProcessed(state.iterations() * N);
-
     const double total_interactions = static_cast<double>(state.iterations() * N);
     state.SetItemsProcessed(total_interactions);
 
@@ -384,14 +382,21 @@ static void BM_Manual_TriangleSoA(benchmark::State& state) {
         for (size_t k = 0; k < steps; k++) {
             for (size_t i = 0; i < N; i++) {
                 double ax = 0, ay = 0, az = 0;
+
                 for (size_t j = i + 1; j < N; j++) {
-                    auto [x, y, z] = lj.eval(posx[i] - posx[j], posy[i] - posy[j], posz[i] - posz[j]);
+                    auto [x, y, z] = lj.eval(
+                        posx[j] - posx[i],
+                        posy[j] - posy[i],
+                        posz[j] - posz[i]
+                    );
                     ax += x; ay += y; az += z;
                     fx[j] -= x; fy[j] -= y; fz[j] -= z;
                 }
-                fx[i] -= ax; fy[i] -= ay; fz[i] -= az;
+
+                fx[i] += ax; fy[i] += ay; fz[i] += az;
             }
         }
+
         benchmark::DoNotOptimize(fx);
         benchmark::DoNotOptimize(fy);
         benchmark::DoNotOptimize(fz);
@@ -411,18 +416,18 @@ static void BM_Manual_TriangleSoA_ExplicitSIMD(benchmark::State& state) {
     const size_t N = state.range(0);
     const size_t steps = state.range(1);
 
-    // 1. Precompute scalars
-    const double sigma2 = SIGMA * SIGMA;
-    const double sigma6 = sigma2 * sigma2 * sigma2;
-    const double sigma12 = sigma6 * sigma6;
-    const double c6_scalar = 24.0 * EPSILON * sigma6;
-    const double c12_scalar = 48.0 * EPSILON * sigma12;
+    // Precompute scalars
+    constexpr double sigma2 = SIGMA * SIGMA;
+    constexpr double sigma6 = sigma2 * sigma2 * sigma2;
+    constexpr double sigma12 = sigma6 * sigma6;
+    constexpr double c6_scalar = 24.0 * EPSILON * sigma6;
+    constexpr double c12_scalar = 48.0 * EPSILON * sigma12;
 
-    // 2. Broadcast to SIMD registers
+    // Broadcast constants
     const batch_d v_c6 = c6_scalar;
     const batch_d v_c12 = c12_scalar;
     const batch_d v_one = 1.0;
-    const size_t V = batch_d::size();
+    constexpr size_t V = batch_d::size();
 
     std::vector<double> posx(N), posy(N), posz(N);
     std::vector<double> fx(N, 0), fy(N, 0), fz(N, 0);
@@ -456,10 +461,10 @@ static void BM_Manual_TriangleSoA_ExplicitSIMD(benchmark::State& state) {
                     batch_d v_yj = batch_d::load_unaligned(&posy[j]);
                     batch_d v_zj = batch_d::load_unaligned(&posz[j]);
 
-                    // dx = posx[i] - posx[j]
-                    batch_d dx = v_xi - v_xj;
-                    batch_d dy = v_yi - v_yj;
-                    batch_d dz = v_zi - v_zj;
+                    // dx = posx[j] - posx[i]
+                    batch_d dx = v_xj - v_xi;
+                    batch_d dy = v_yj - v_yi;
+                    batch_d dz = v_zj - v_zi;
 
                     batch_d r2 = (dx * dx) + (dy * dy) + (dz * dz);
                     batch_d inv_r2 = v_one / r2;
@@ -549,26 +554,29 @@ static void BM_Manual_TriangleSoA_ExplicitSIMD(benchmark::State& state) {
 
 
 
-// ============================================================================
-// Registration
-// ============================================================================
+// ------------
+// REGISTRATION
+// ------------
 
+// LINKED CELLS
 // N_DIM = 50 (125k particles), Steps = 25
 
-// 1. Array of Structures (Baseline memory layout)
+// Array of Structures
 BENCHMARK_TEMPLATE(BM_LinkedCells_UpdateForcesOnly, Layout::AoS, VectorPolicy::Scalar)->Args({50, 25})->Unit(benchmark::kMillisecond);
 BENCHMARK_TEMPLATE(BM_LinkedCells_FullIntegration, Layout::AoS, VectorPolicy::Scalar)->Args({50, 25})->Unit(benchmark::kMillisecond);
 
-// 2. Structure of Arrays (Scalar & Auto)
+// Structure of Arrays
 BENCHMARK_TEMPLATE(BM_LinkedCells_UpdateForcesOnly, Layout::SoA, VectorPolicy::Scalar)->Args({50, 25})->Unit(benchmark::kMillisecond);
 BENCHMARK_TEMPLATE(BM_LinkedCells_UpdateForcesOnly, Layout::SoA, VectorPolicy::Auto)->Args({50, 25})->Unit(benchmark::kMillisecond);
 
-// 3. Array of Structures of Arrays (The primary target for SIMD)
+// Array of Structures of Arrays
 BENCHMARK_TEMPLATE(BM_LinkedCells_UpdateForcesOnly, Layout::AoSoA<>, VectorPolicy::Auto)->Args({50, 25})->Unit(benchmark::kMillisecond);
 BENCHMARK_TEMPLATE(BM_LinkedCells_FullIntegration, Layout::AoSoA<>, VectorPolicy::Auto)->Args({50, 25})->Unit(benchmark::kMillisecond);
 
 
-// N = 4000, Steps = 200 (Matches your original hardcoded variables)
+// DIRECT SUM
+// N = 4000, Steps = 200
+
 // Array of Structures (Auto)
 BENCHMARK_TEMPLATE(BM_DirectSum_FullIntegration, Layout::AoS, VectorPolicy::Scalar)->Args({4000, 200})->Unit(benchmark::kMillisecond);
 BENCHMARK_TEMPLATE(BM_DirectSum_UpdateForcesOnly, Layout::AoS, VectorPolicy::Scalar)->Args({4000, 200})->Unit(benchmark::kMillisecond);
@@ -585,6 +593,8 @@ BENCHMARK_TEMPLATE(BM_DirectSum_UpdateForcesOnly, Layout::SoA, VectorPolicy::Aut
 BENCHMARK_TEMPLATE(BM_DirectSum_FullIntegration, Layout::AoSoA<>, VectorPolicy::Auto)->Args({4000, 200})->Unit(benchmark::kMillisecond);
 BENCHMARK_TEMPLATE(BM_DirectSum_UpdateForcesOnly, Layout::AoSoA<>, VectorPolicy::Auto)->Args({4000, 200})->Unit(benchmark::kMillisecond);
 
+
+// HARDCODED INTERACTION LOOPS
 // For the MaxPerf benchmark, range is total interactions per step
 BENCHMARK(BM_Manual_AbsoluteMaxPerf)->Arg(4000 * 3999 / 2)->Unit(benchmark::kMillisecond);
 BENCHMARK(BM_Manual_RealisticVectorRead)->Arg(4000 * 3999 / 2)->Unit(benchmark::kMillisecond);

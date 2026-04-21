@@ -1,0 +1,11 @@
+Dependency Fetch Date: 2026-04-21T19:56:07+02:00
+
+April:
+  Repo: https://github.com/JKKDY/april.git
+  Ref: dev
+  Commit: 27afb645e5d251c4e8aa1474fc74289338b003de
+
+Google Benchmark:
+  Repo: https://github.com/google/benchmark.git
+  Ref: v1.8.3
+  Commit: 344117638c8ff7e239044fd0fa7085839fc03021

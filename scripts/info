@@ -1,6 +1,8 @@
 interactive session on cm4 inter
 srun -M inter -p cm4_inter -n 1 -c 32 --cpu-bind=cores --sockets-per-node=1 --hint=nomultithread --pty bash
 
+srun -M inter -p cm4_inter -n 1 -c 4 --cpu-bind=cores --sockets-per-node=1 --hint=nomultithread --pty bash
+
 srun \
   -M inter \
   -p cm4_inter \

@@ -1,2 +1,0 @@
-Timestamp,Label,Particles,Threads,Steps,Integration_s,MUPS,Avg_s,Median_s,P05_s,P99_s,StdDev_s
-2026-04-21 23:13:19.737649962,Argon_n81_rho0.8442_SoA_OmpExecutor_C08_hilbert_2x2x2,531441,16,500,8.41078,31.5928,0.0168216,0.0168247,0.0165568,0.0185455,0.000245974

@@ -55,3 +55,9 @@ CMakeSettings.json
 *.err
 *.out
 
+
+*grid*.data
+*.dump
+
+results1
+external

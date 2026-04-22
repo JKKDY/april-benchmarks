@@ -50,8 +50,11 @@ build_one() {
 
     local cc=""
     local cxx=""
-    local isa_flags=""
-    local common_flags="-O3 -DNDEBUG -fno-math-errno -ffast-math"
+
+    local gcc_common_flags="-O3 -DNDEBUG -fno-math-errno -ffast-math"
+    local intel_generic_flags="-O3 -DNDEBUG -fp-model=fast -qopenmp"
+    local intel_native_flags="-O3 -DNDEBUG -xHost -qopenmp -qopt-zmm-usage=high -fp-model=fast"
+
     local extra_cxx_flags=""
     local extra_c_flags=""
     local runtime_hint=""
@@ -65,7 +68,8 @@ build_one() {
             cxx="g++"
             build_mpi="OFF"
             pkg_intel="OFF"
-            isa_flags=""
+            extra_c_flags="$gcc_common_flags"
+            extra_cxx_flags="$gcc_common_flags"
             runtime_hint="Run with 1 process, threads, -sf omp"
             ;;
 
@@ -75,7 +79,8 @@ build_one() {
             cxx="g++"
             build_mpi="OFF"
             pkg_intel="OFF"
-            isa_flags="-march=native"
+            extra_c_flags="$gcc_common_flags -march=native"
+            extra_cxx_flags="$gcc_common_flags -march=native"
             runtime_hint="Run with 1 process, threads, -sf omp"
             ;;
 
@@ -85,7 +90,8 @@ build_one() {
             cxx="mpiicpx"
             build_mpi="ON"
             pkg_intel="ON"
-            isa_flags=""
+            extra_c_flags="$intel_generic_flags"
+            extra_cxx_flags="$intel_generic_flags"
             intel_arch="cpu"
             intel_lrt_mode="none"
             runtime_hint="Run either as 1 MPI rank + threads (-sf intel) or many MPI ranks (-sf intel)"
@@ -97,7 +103,8 @@ build_one() {
             cxx="mpiicpx"
             build_mpi="ON"
             pkg_intel="ON"
-            isa_flags="-xHost"
+            extra_c_flags="$intel_native_flags"
+            extra_cxx_flags="$intel_native_flags"
             intel_arch="cpu"
             intel_lrt_mode="none"
             runtime_hint="Run either as 1 MPI rank + threads (-sf intel) or many MPI ranks (-sf intel)"
@@ -108,14 +115,6 @@ build_one() {
             usage
             ;;
     esac
-
-    extra_cxx_flags="$common_flags $isa_flags"
-    extra_c_flags="$common_flags $isa_flags"
-
-    if [[ "$pkg_intel" == "ON" ]]; then
-        extra_cxx_flags="$extra_cxx_flags -qopenmp"
-        extra_c_flags="$extra_c_flags -qopenmp"
-    fi
 
     local build_dir="${PROJECT_ROOT}/build/lammps-${config}"
     local install_dir="${build_dir}/install"
@@ -159,6 +158,7 @@ build_one() {
         cmake_args+=(
             -DINTEL_ARCH="$intel_arch"
             -DINTEL_LRT_MODE="$intel_lrt_mode"
+            -DLAMMPS_FP_MODEL=fast
         )
     fi
 
@@ -186,6 +186,7 @@ build_one() {
         if [[ "$pkg_intel" == "ON" ]]; then
             echo "INTEL_ARCH: $intel_arch"
             echo "INTEL_LRT_MODE: $intel_lrt_mode"
+            echo "LAMMPS_FP_MODEL: fast"
         fi
         echo "Runtime Hint: $runtime_hint"
         echo "CMake: $(cmake --version | head -n 1)"
@@ -196,7 +197,7 @@ build_one() {
     } > "$info_file"
 
     echo "Built: $config"
-    echo "Binary: ${install_dir}/bin/lmp"
+    echo "Binary: ${install_dir}/lmp"
     echo "Info:   $info_file"
 }
 

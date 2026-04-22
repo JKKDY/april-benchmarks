@@ -25,5 +25,5 @@ export OMP_PROC_BIND=close
 
 for i in {1..5}; do
   echo "=== Run $i/5 ==="
-  srun --cpu-bind=cores ./scripts/run_april_suite.sh native-novec
+  srun --cpu-bind=cores ./scripts/run_april_suite.sh
 done

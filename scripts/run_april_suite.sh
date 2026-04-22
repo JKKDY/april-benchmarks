@@ -100,22 +100,22 @@ echo "============================================================"
 echo "Running force_kernel_bench"
 echo "============================================================"
 
-# SCENARIO=default RUN_ID="$SUITE_TIME" "$APRIL_RUN" "$CONFIG" force_kernel_bench \
-#     --benchmark_repetitions=5 \
-#     --benchmark_report_aggregates_only=true \
-#     --benchmark_out_format=json \
-#     --benchmark_out=force_kernel_bench.json
+SCENARIO=default RUN_ID="$SUITE_TIME" "$APRIL_RUN" "$CONFIG" force_kernel_bench \
+    --benchmark_repetitions=1 \
+    --benchmark_report_aggregates_only=true \
+    --benchmark_out_format=json \
+    --benchmark_out=force_kernel_bench.json
 
 echo
 echo "============================================================"
 echo "Running april_vs_hardcoded"
 echo "============================================================"
 
-# SCENARIO=default RUN_ID="$SUITE_TIME" "$APRIL_RUN" "$CONFIG" april_vs_hardcoded \
-#     --benchmark_repetitions=5 \
-#     --benchmark_report_aggregates_only=true \
-#     --benchmark_out_format=json \
-#     --benchmark_out=april_vs_hardcoded.json
+SCENARIO=default RUN_ID="$SUITE_TIME" "$APRIL_RUN" "$CONFIG" april_vs_hardcoded \
+    --benchmark_repetitions=1 \
+    --benchmark_report_aggregates_only=true \
+    --benchmark_out_format=json \
+    --benchmark_out=april_vs_hardcoded.json
 
 # ------------------------------------------------------------------------------
 # 2. Argon block scaling sweeps
@@ -252,10 +252,10 @@ echo "  ordering:          $ARGON_ORDERING"
 echo "  threads:           ${ARGON_THREADS[*]}"
 echo
 
-# for T in "${ARGON_THREADS[@]}"; do
-#     N_WEAK="$(weak_n_for_threads "$ARGON_WEAK_BASE_N" "$T")"
-#     run_argon_once "weak" "$N_WEAK" "$T"
-# done
+for T in "${ARGON_THREADS[@]}"; do
+    N_WEAK="$(weak_n_for_threads "$ARGON_WEAK_BASE_N" "$T")"
+    run_argon_once "weak" "$N_WEAK" "$T"
+done
 
 echo
 echo "April benchmark suite complete."

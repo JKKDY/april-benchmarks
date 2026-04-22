@@ -88,7 +88,7 @@ auto argon_block = []<typename Layout, typename ExecutorType>(
     std::ranges::replace(safe_tag, ' ', '_');
     std::ranges::replace(safe_tag, '/', '_');
 
-    const fs::path root_dir = fs::path(PROJECT_SOURCE_DIR) / "results/argon_block";
+    const fs::path root_dir = fs::path(PROJECT_SOURCE_DIR) / "results/april";
     if (!fs::exists(root_dir)) fs::create_directories(root_dir);
 
     const fs::path csv_path = root_dir / std::format("argon_block_{}.csv", safe_tag);

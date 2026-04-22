@@ -16,7 +16,7 @@ Usage:
   $0 [<isa|all>] [--allow-auto-vectorization|--disable-auto-vectorization]
 
 ISA options:
-  scalar
+  generic
   sse
   avx2
   avx512
@@ -37,16 +37,16 @@ Defaults:
 Special behavior:
   $0 all
       builds:
-        scalar-novec
-        sse-novec
-        avx2-novec
-        avx512-novec
+        generic-autovec
+        sse-autovec
+        avx2-autovec
+        avx512-autovec
         native-novec
         native-autovec
 
 Build output variants:
-  scalar-autovec
-  scalar-novec
+  generic-autovec
+  generic-novec
   sse-autovec
   sse-novec
   avx2-autovec
@@ -102,7 +102,7 @@ build_one() {
     local build_suffix=""
 
     case "$variant" in
-        scalar)
+        generic)
             isa_flags=""
             april_xsimd="ON"
             explicit_simd_baselines="OFF"
@@ -234,20 +234,20 @@ done
 check_dependencies
 
 if [[ "$VARIANT" == "all" ]]; then
-    build_one scalar OFF
-    build_one sse OFF
-    build_one avx2 OFF
-    build_one avx512 OFF
+    build_one generic ON
+    build_one sse ON
+    build_one avx2 ON
+    build_one avx512 ON
     build_one native OFF
     build_one native ON
 
     echo
     echo "All April benchmark configs built."
     echo "Builds:"
-    echo "  ${PROJECT_ROOT}/build/april-scalar-novec"
-    echo "  ${PROJECT_ROOT}/build/april-sse-novec"
-    echo "  ${PROJECT_ROOT}/build/april-avx2-novec"
-    echo "  ${PROJECT_ROOT}/build/april-avx512-novec"
+    echo "  ${PROJECT_ROOT}/build/april-generic-autovec"
+    echo "  ${PROJECT_ROOT}/build/april-sse-autovec"
+    echo "  ${PROJECT_ROOT}/build/april-avx2-autovec"
+    echo "  ${PROJECT_ROOT}/build/april-avx512-autovec"
     echo "  ${PROJECT_ROOT}/build/april-native-novec"
     echo "  ${PROJECT_ROOT}/build/april-native-autovec"
 else

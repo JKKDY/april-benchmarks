@@ -1,0 +1,79 @@
+---------------------------------------------------------------------------------------------------------------------------------------------
+Benchmark                                                                                   Time             CPU   Iterations UserCounters...
+---------------------------------------------------------------------------------------------------------------------------------------------
+BM_LinkedCells_UpdateForcesOnly<Layout::AoS, VectorPolicy::Scalar>/50/25_mean            3446 ms         3446 ms            5 items_per_second=276.065M/s ns/interaction=3.62235s
+BM_LinkedCells_UpdateForcesOnly<Layout::AoS, VectorPolicy::Scalar>/50/25_median          3442 ms         3441 ms            5 items_per_second=276.454M/s ns/interaction=3.61724s
+BM_LinkedCells_UpdateForcesOnly<Layout::AoS, VectorPolicy::Scalar>/50/25_stddev          8.88 ms         8.87 ms            5 items_per_second=708.211k/s ns/interaction=9.32131ms
+BM_LinkedCells_UpdateForcesOnly<Layout::AoS, VectorPolicy::Scalar>/50/25_cv              0.26 %          0.26 %             5 items_per_second=0.26% ns/interaction=0.26%
+BM_LinkedCells_FullIntegration<Layout::AoS, VectorPolicy::Scalar>/50/25_mean             3633 ms         3633 ms            5 items_per_second=261.855M/s ns/interaction=3.81891s
+BM_LinkedCells_FullIntegration<Layout::AoS, VectorPolicy::Scalar>/50/25_median           3633 ms         3632 ms            5 items_per_second=261.903M/s ns/interaction=3.81821s
+BM_LinkedCells_FullIntegration<Layout::AoS, VectorPolicy::Scalar>/50/25_stddev           1.96 ms         1.95 ms            5 items_per_second=140.368k/s ns/interaction=2.04832ms
+BM_LinkedCells_FullIntegration<Layout::AoS, VectorPolicy::Scalar>/50/25_cv               0.05 %          0.05 %             5 items_per_second=0.05% ns/interaction=0.05%
+BM_LinkedCells_UpdateForcesOnly<Layout::SoA, VectorPolicy::Scalar>/50/25_mean            3969 ms         3968 ms            5 items_per_second=239.734M/s ns/interaction=4.17131s
+BM_LinkedCells_UpdateForcesOnly<Layout::SoA, VectorPolicy::Scalar>/50/25_median          3965 ms         3964 ms            5 items_per_second=239.95M/s ns/interaction=4.16754s
+BM_LinkedCells_UpdateForcesOnly<Layout::SoA, VectorPolicy::Scalar>/50/25_stddev          8.79 ms         8.80 ms            5 items_per_second=530.855k/s ns/interaction=9.24624ms
+BM_LinkedCells_UpdateForcesOnly<Layout::SoA, VectorPolicy::Scalar>/50/25_cv              0.22 %          0.22 %             5 items_per_second=0.22% ns/interaction=0.22%
+BM_LinkedCells_UpdateForcesOnly<Layout::SoA, VectorPolicy::Auto>/50/25_mean              1122 ms         1121 ms            5 items_per_second=848.296M/s ns/interaction=1.17883s
+BM_LinkedCells_UpdateForcesOnly<Layout::SoA, VectorPolicy::Auto>/50/25_median            1122 ms         1121 ms            5 items_per_second=848.334M/s ns/interaction=1.17878s
+BM_LinkedCells_UpdateForcesOnly<Layout::SoA, VectorPolicy::Auto>/50/25_stddev           0.414 ms        0.417 ms            5 items_per_second=315.585k/s ns/interaction=438.511us
+BM_LinkedCells_UpdateForcesOnly<Layout::SoA, VectorPolicy::Auto>/50/25_cv                0.04 %          0.04 %             5 items_per_second=0.04% ns/interaction=0.04%
+BM_LinkedCells_UpdateForcesOnly<Layout::AoSoA<>, VectorPolicy::Auto>/50/25_mean          1082 ms         1082 ms            5 items_per_second=879.465M/s ns/interaction=1.13706s
+BM_LinkedCells_UpdateForcesOnly<Layout::AoSoA<>, VectorPolicy::Auto>/50/25_median        1082 ms         1082 ms            5 items_per_second=879.541M/s ns/interaction=1.13696s
+BM_LinkedCells_UpdateForcesOnly<Layout::AoSoA<>, VectorPolicy::Auto>/50/25_stddev       0.205 ms        0.208 ms            5 items_per_second=169.292k/s ns/interaction=218.92us
+BM_LinkedCells_UpdateForcesOnly<Layout::AoSoA<>, VectorPolicy::Auto>/50/25_cv            0.02 %          0.02 %             5 items_per_second=0.02% ns/interaction=0.02%
+BM_LinkedCells_FullIntegration<Layout::AoSoA<>, VectorPolicy::Auto>/50/25_mean           1196 ms         1196 ms            5 items_per_second=795.665M/s ns/interaction=1.25681s
+BM_LinkedCells_FullIntegration<Layout::AoSoA<>, VectorPolicy::Auto>/50/25_median         1196 ms         1196 ms            5 items_per_second=795.652M/s ns/interaction=1.25683s
+BM_LinkedCells_FullIntegration<Layout::AoSoA<>, VectorPolicy::Auto>/50/25_stddev        0.033 ms        0.036 ms            5 items_per_second=23.7899k/s ns/interaction=37.5776us
+BM_LinkedCells_FullIntegration<Layout::AoSoA<>, VectorPolicy::Auto>/50/25_cv             0.00 %          0.00 %             5 items_per_second=0.00% ns/interaction=0.00%
+BM_DirectSum_FullIntegration<Layout::AoS, VectorPolicy::Scalar>/4000/200_mean            6100 ms         6099 ms            5 items_per_second=262.264M/s ns/interaction=3.81296s
+BM_DirectSum_FullIntegration<Layout::AoS, VectorPolicy::Scalar>/4000/200_median          6100 ms         6099 ms            5 items_per_second=262.292M/s ns/interaction=3.81254s
+BM_DirectSum_FullIntegration<Layout::AoS, VectorPolicy::Scalar>/4000/200_stddev          2.34 ms         2.37 ms            5 items_per_second=101.986k/s ns/interaction=1.48299ms
+BM_DirectSum_FullIntegration<Layout::AoS, VectorPolicy::Scalar>/4000/200_cv              0.04 %          0.04 %             5 items_per_second=0.04% ns/interaction=0.04%
+BM_DirectSum_UpdateForcesOnly<Layout::AoS, VectorPolicy::Scalar>/4000/200_mean           5861 ms         5860 ms            5 items_per_second=272.962M/s ns/interaction=3.66352s
+BM_DirectSum_UpdateForcesOnly<Layout::AoS, VectorPolicy::Scalar>/4000/200_median         5861 ms         5860 ms            5 items_per_second=272.963M/s ns/interaction=3.6635s
+BM_DirectSum_UpdateForcesOnly<Layout::AoS, VectorPolicy::Scalar>/4000/200_stddev        0.879 ms        0.860 ms            5 items_per_second=40.0698k/s ns/interaction=537.822us
+BM_DirectSum_UpdateForcesOnly<Layout::AoS, VectorPolicy::Scalar>/4000/200_cv             0.01 %          0.01 %             5 items_per_second=0.01% ns/interaction=0.01%
+BM_DirectSum_FullIntegration<Layout::SoA, VectorPolicy::Scalar>/4000/200_mean            6645 ms         6644 ms            5 items_per_second=240.761M/s ns/interaction=4.1535s
+BM_DirectSum_FullIntegration<Layout::SoA, VectorPolicy::Scalar>/4000/200_median          6645 ms         6644 ms            5 items_per_second=240.773M/s ns/interaction=4.15329s
+BM_DirectSum_FullIntegration<Layout::SoA, VectorPolicy::Scalar>/4000/200_stddev          3.21 ms         3.17 ms            5 items_per_second=114.795k/s ns/interaction=1.98133ms
+BM_DirectSum_FullIntegration<Layout::SoA, VectorPolicy::Scalar>/4000/200_cv              0.05 %          0.05 %             5 items_per_second=0.05% ns/interaction=0.05%
+BM_DirectSum_UpdateForcesOnly<Layout::SoA, VectorPolicy::Scalar>/4000/200_mean           6354 ms         6353 ms            5 items_per_second=251.774M/s ns/interaction=3.97182s
+BM_DirectSum_UpdateForcesOnly<Layout::SoA, VectorPolicy::Scalar>/4000/200_median         6354 ms         6353 ms            5 items_per_second=251.778M/s ns/interaction=3.97175s
+BM_DirectSum_UpdateForcesOnly<Layout::SoA, VectorPolicy::Scalar>/4000/200_stddev         1.51 ms         1.60 ms            5 items_per_second=63.4252k/s ns/interaction=1.00068ms
+BM_DirectSum_UpdateForcesOnly<Layout::SoA, VectorPolicy::Scalar>/4000/200_cv             0.02 %          0.03 %             5 items_per_second=0.03% ns/interaction=0.03%
+BM_DirectSum_FullIntegration<Layout::SoA, VectorPolicy::Auto>/4000/200_mean              1602 ms         1602 ms            5 items_per_second=998.545M/s ns/interaction=1.00146s
+BM_DirectSum_FullIntegration<Layout::SoA, VectorPolicy::Auto>/4000/200_median            1602 ms         1602 ms            5 items_per_second=998.517M/s ns/interaction=1.00149s
+BM_DirectSum_FullIntegration<Layout::SoA, VectorPolicy::Auto>/4000/200_stddev           0.218 ms        0.222 ms            5 items_per_second=138.205k/s ns/interaction=138.599us
+BM_DirectSum_FullIntegration<Layout::SoA, VectorPolicy::Auto>/4000/200_cv                0.01 %          0.01 %             5 items_per_second=0.01% ns/interaction=0.01%
+BM_DirectSum_UpdateForcesOnly<Layout::SoA, VectorPolicy::Auto>/4000/200_mean             1583 ms         1583 ms            5 items_per_second=1.01044G/s ns/interaction=0.989669s
+BM_DirectSum_UpdateForcesOnly<Layout::SoA, VectorPolicy::Auto>/4000/200_median           1583 ms         1583 ms            5 items_per_second=1.01052G/s ns/interaction=0.98959s
+BM_DirectSum_UpdateForcesOnly<Layout::SoA, VectorPolicy::Auto>/4000/200_stddev          0.230 ms        0.230 ms            5 items_per_second=146.624k/s ns/interaction=143.628us
+BM_DirectSum_UpdateForcesOnly<Layout::SoA, VectorPolicy::Auto>/4000/200_cv               0.01 %          0.01 %             5 items_per_second=0.01% ns/interaction=0.01%
+BM_DirectSum_FullIntegration<Layout::AoSoA<>, VectorPolicy::Auto>/4000/200_mean          1615 ms         1615 ms            5 items_per_second=990.816M/s ns/interaction=1.00934s
+BM_DirectSum_FullIntegration<Layout::AoSoA<>, VectorPolicy::Auto>/4000/200_median        1618 ms         1617 ms            5 items_per_second=988.948M/s ns/interaction=1.01118s
+BM_DirectSum_FullIntegration<Layout::AoSoA<>, VectorPolicy::Auto>/4000/200_stddev        15.5 ms         15.4 ms            5 items_per_second=9.43318M/s ns/interaction=9.64507ms
+BM_DirectSum_FullIntegration<Layout::AoSoA<>, VectorPolicy::Auto>/4000/200_cv            0.96 %          0.96 %             5 items_per_second=0.95% ns/interaction=0.96%
+BM_DirectSum_UpdateForcesOnly<Layout::AoSoA<>, VectorPolicy::Auto>/4000/200_mean         1534 ms         1534 ms            5 items_per_second=1.04274G/s ns/interaction=0.959013s
+BM_DirectSum_UpdateForcesOnly<Layout::AoSoA<>, VectorPolicy::Auto>/4000/200_median       1534 ms         1534 ms            5 items_per_second=1.04279G/s ns/interaction=0.958968s
+BM_DirectSum_UpdateForcesOnly<Layout::AoSoA<>, VectorPolicy::Auto>/4000/200_stddev      0.278 ms        0.260 ms            5 items_per_second=176.503k/s ns/interaction=162.36us
+BM_DirectSum_UpdateForcesOnly<Layout::AoSoA<>, VectorPolicy::Auto>/4000/200_cv           0.02 %          0.02 %             5 items_per_second=0.02% ns/interaction=0.02%
+BM_Manual_AbsoluteMaxPerf/7998000_mean                                                   5.46 ms         5.46 ms            5 items_per_second=1.46514G/s ns/interaction=0.682527s
+BM_Manual_AbsoluteMaxPerf/7998000_median                                                 5.46 ms         5.46 ms            5 items_per_second=1.46513G/s ns/interaction=0.682534s
+BM_Manual_AbsoluteMaxPerf/7998000_stddev                                                0.001 ms        0.001 ms            5 items_per_second=180.606k/s ns/interaction=84.1376us
+BM_Manual_AbsoluteMaxPerf/7998000_cv                                                     0.01 %          0.01 %             5 items_per_second=0.01% ns/interaction=0.01%
+BM_Manual_RealisticVectorRead/7998000_mean                                               14.0 ms         14.0 ms            5 items_per_second=570.676M/s ns/interaction=1.7527s
+BM_Manual_RealisticVectorRead/7998000_median                                             13.9 ms         13.9 ms            5 items_per_second=573.746M/s ns/interaction=1.74293s
+BM_Manual_RealisticVectorRead/7998000_stddev                                            0.236 ms        0.236 ms            5 items_per_second=9.52071M/s ns/interaction=0.0294826s
+BM_Manual_RealisticVectorRead/7998000_cv                                                 1.68 %          1.68 %             5 items_per_second=1.67% ns/interaction=1.68%
+BM_Manual_TriangleAoS/4000/200_mean                                                      2452 ms         2451 ms            5 items_per_second=652.564M/s ns/interaction=1.53242s
+BM_Manual_TriangleAoS/4000/200_median                                                    2452 ms         2451 ms            5 items_per_second=652.516M/s ns/interaction=1.53253s
+BM_Manual_TriangleAoS/4000/200_stddev                                                   0.546 ms        0.507 ms            5 items_per_second=134.967k/s ns/interaction=316.915us
+BM_Manual_TriangleAoS/4000/200_cv                                                        0.02 %          0.02 %             5 items_per_second=0.02% ns/interaction=0.02%
+BM_Manual_TriangleSoA/4000/200_mean                                                      5766 ms         5765 ms            5 items_per_second=277.46M/s ns/interaction=3.60412s
+BM_Manual_TriangleSoA/4000/200_median                                                    5766 ms         5765 ms            5 items_per_second=277.462M/s ns/interaction=3.6041s
+BM_Manual_TriangleSoA/4000/200_stddev                                                   0.230 ms        0.198 ms            5 items_per_second=9.50863k/s ns/interaction=123.515us
+BM_Manual_TriangleSoA/4000/200_cv                                                        0.00 %          0.00 %             5 items_per_second=0.00% ns/interaction=0.00%
+BM_Manual_TriangleSoA_ExplicitSIMD/4000/200_mean                                         1543 ms         1543 ms            5 items_per_second=1.03688G/s ns/interaction=0.964429s
+BM_Manual_TriangleSoA_ExplicitSIMD/4000/200_median                                       1543 ms         1543 ms            5 items_per_second=1.03679G/s ns/interaction=0.964516s
+BM_Manual_TriangleSoA_ExplicitSIMD/4000/200_stddev                                      0.406 ms        0.394 ms            5 items_per_second=265.155k/s ns/interaction=246.576us
+BM_Manual_TriangleSoA_ExplicitSIMD/4000/200_cv                                           0.03 %          0.03 %             5 items_per_second=0.03% ns/interaction=0.03%

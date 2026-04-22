@@ -126,7 +126,7 @@ ARGON_WEAK_BASE_N="${ARGON_WEAK_BASE_N:-32}"
 
 ARGON_RHO="${ARGON_RHO:-0.8442}"
 ARGON_DT="${ARGON_DT:-0.005}"
-ARGON_STEPS="${ARGON_STEPS:-1000}"
+ARGON_STEPS="${ARGON_STEPS:-500}"
 
 ARGON_BX="${ARGON_BX:-2}"
 ARGON_BY="${ARGON_BY:-2}"
@@ -252,10 +252,10 @@ echo "  ordering:          $ARGON_ORDERING"
 echo "  threads:           ${ARGON_THREADS[*]}"
 echo
 
-for T in "${ARGON_THREADS[@]}"; do
-    N_WEAK="$(weak_n_for_threads "$ARGON_WEAK_BASE_N" "$T")"
-    run_argon_once "weak" "$N_WEAK" "$T"
-done
+# for T in "${ARGON_THREADS[@]}"; do
+#     N_WEAK="$(weak_n_for_threads "$ARGON_WEAK_BASE_N" "$T")"
+#     run_argon_once "weak" "$N_WEAK" "$T"
+# done
 
 echo
 echo "April benchmark suite complete."

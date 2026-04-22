@@ -1,0 +1,95 @@
+# ===================================================================
+# LAMMPS Argon Benchmark
+# Matches APRIL create_argon_environment()
+# ===================================================================
+
+processors * * * grid numa
+
+# Expected from command line:
+# -var rho   0.8442
+# -var n     4
+# -var steps 500
+# -var dt    0.001
+
+units           lj
+atom_style      atomic
+boundary        p p p
+
+# LJ fluid parameters
+variable        temperature equal 1.0
+variable        epsilon     equal 1.0
+variable        sigma       equal 1.0
+variable        rcut        equal 2.5*v_sigma
+
+# APRIL-style box and spacing from n^3 particles at density rho
+variable        N      equal v_n*v_n*v_n
+variable        vol    equal v_N/v_rho
+variable        L      equal v_vol^(1.0/3.0)
+variable        half_L equal 0.5*v_L
+
+# Desired lattice spacing
+variable        a      equal 1.1225
+
+# Number of atoms per dimension: n_dim
+# Particle lattice volume should be n_dim * a wide, not (n_dim - 1) * a
+variable        Lcells equal v_n_dim*v_a
+variable        halfCells equal 0.5*v_Lcells
+
+# APRIL-style physical span between outermost particles
+variable        Lspan equal (v_n_dim-1)*v_a
+
+# Keep your larger simulation box based on APRIL span
+variable        E      equal 1.5*v_Lspan
+variable        half_E equal 0.5*v_E
+
+region          box block -${half_E} ${half_E} -${half_E} ${half_E} -${half_E} ${half_E} units box
+create_box      1 box
+
+# Simple-cubic density corresponding to spacing a
+variable        rho_grid equal 1.0/(v_a*v_a*v_a)
+
+# Region of width n_dim*a gives exactly n_dim sites with origin 0.5
+region          atoms block -${halfCells} ${halfCells} -${halfCells} ${halfCells} -${halfCells} ${halfCells} units box
+
+lattice         sc ${rho_grid} origin 0.5 0.5 0.5
+create_atoms    1 region atoms
+
+mass            1 1.0
+
+# Maxwell-Boltzmann initialization at T = 1.0
+velocity        all create ${temperature} 87287 loop geom
+
+# Lennard-Jones interactions
+pair_style      lj/cut ${rcut}
+pair_coeff      1 1 ${epsilon} ${sigma}
+
+# Match APRIL linked-cells skin and rebuild policy
+neighbor        0.3 bin
+neigh_modify    every 1 delay 0 check yes
+
+# NVE integration with runtime-controlled timestep
+fix             1 all nve
+timestep        ${dt}
+
+# Ouput initial geometry to cross check with APRIL (uncomment) 
+# print "N        = ${N}"
+# print "L        = ${L}"
+# print "spacing  = $(v_L/v_n)"
+# dump            geom all custom 1 geom.lammpstrj id type x y z vx vy vz
+# dump_modify     geom sort id
+
+thermo          1
+thermo_style    custom step atoms temp pe ke etotal press
+
+# Build state and dump initial configuration
+run             0
+undump          geom
+
+# Same warmup fraction as APRIL
+variable        warmup_steps equal round(v_steps*0.1)
+run             ${warmup_steps} post no
+
+# Timed benchmark region
+reset_timestep  0
+thermo          ${steps}
+run             ${steps}

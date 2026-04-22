@@ -1,104 +1,115 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-# --- Configuration ---
-PROJECT_ROOT="$(pwd)/.."
-INTEL_BIN="${PROJECT_ROOT}/lammps/build_intel/lmp"
-KOKKOS_BIN="${PROJECT_ROOT}/lammps/build_kokkos/lmp"
-INPUT_FILE="./in.argon_block"
+module load gcc/14.2.0 cmake ninja
 
-# --- Usage ---
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
 usage() {
-    echo "Usage: $0 <intel|kokkos> <physical_cores> <n> <rho> <steps>"
-    echo "Example: $0 intel 32 100 0.8 500"
+    cat >&2 <<EOF
+Usage:
+  $0 <config> <benchmark> [args...]
+
+Examples:
+  $0 native argon_block 0.8442 32 500
+EOF
     exit 1
 }
 
-if [ "$#" -ne 5 ]; then usage; fi
+sanitize_path_component() {
+    local value="$1"
+    value="${value// /_}"
+    value="${value//\//_}"
+    value="${value//:/-}"
+    value="${value//,/}"
+    echo "$value"
+}
 
-BACKEND=$1
-CORES=$2
-N_DIM=$3
-RHO=$4
-STEPS=$5
+if [[ $# -lt 2 ]]; then
+    usage
+fi
 
-# --- Execution Logic ---
-case $BACKEND in
-    intel)
-        if [ ! -f "$INTEL_BIN" ]; then echo "Error: Intel binary not found!"; exit 1; fi
-        echo "--- Running LAMMPS INTEL: Cores=$CORES (MPI=$CORES, OMP=1), N=$N_DIM, Rho=$RHO ---"
-        
-        # 1. Load Intel Environment
-        module load intel intel-mpi intel-mkl intel-oneapi-tbb
+CONFIG="$1"
+BENCHMARK="$2"
+shift 2
 
-        # 2. Intel-Specific Thread & Affinity Setup
-        # export KMP_BLOCKTIME=0
-        # export KMP_AFFINITY=granularity=fine,compact,1,0
-        # export MKL_NUM_THREADS=1
-        # export OMP_NUM_THREADS=1  # 2 threads per MPI task to use SMT/Hyperthreading
-        export OMP_NUM_THREADS="$CORES"
-        export OMP_PROC_BIND=close
-        export OMP_PLACES=cores
-        export KMP_SETTINGS=1
-        export KMP_AFFINITY=verbose,granularity=fine,compact,1,0
-        # export KMP_AFFINITY=granularity=fine,spread
-        # export I_MPI_PIN=off
+BUILD_DIR="${PROJECT_ROOT}/build/lammps-${CONFIG}"
+LAMMPS_BIN="${BUILD_DIR}/lmp"
 
-        # 3. Launch via MPI
-        mpirun -np 1 --bind-to none numactl --localalloc "$INTEL_BIN" \
-            -in "$INPUT_FILE" \
-            -var n "$N_DIM" -var rho "$RHO" -var steps "$STEPS" \
-            -sf intel \
-            -pk intel 0 mode double omp "$CORES" lrt no
+if [[ ! -x "$LAMMPS_BIN" ]]; then
+    echo "LAMMPS binary not found: $LAMMPS_BIN" >&2
+    exit 1
+fi
+
+RUN_ID="$(sanitize_path_component "${RUN_ID:-$(date +%Y%m%d_%H%M%S)}")"
+SCENARIO="$(sanitize_path_component "${SCENARIO:-default}")"
+RESULT_BASE="${RESULT_ROOT:-${PROJECT_ROOT}/results/lammps}"
+RESULT_DIR="${RESULT_BASE}/${CONFIG}/${BENCHMARK}/${SCENARIO}/${RUN_ID}"
+
+mkdir -p "$RESULT_DIR"
+
+STDOUT_FILE="${RESULT_DIR}/stdout.log"
+STDERR_FILE="${RESULT_DIR}/stderr.log"
+META_FILE="${RESULT_DIR}/run_info.txt"
+COMMAND_FILE="${RESULT_DIR}/command.txt"
+
+case "$BENCHMARK" in
+    argon_block)
+        if [[ $# -lt 3 ]]; then
+            echo "argon_block requires: <rho> <n> <steps>" >&2
+            exit 1
+        fi
+
+        RHO="$1"
+        N="$2"
+        STEPS="$3"
+
+        INPUT_FILE="${SCRIPT_DIR}/inputs/argon_block.in"
+
+        CMD=(
+            "$LAMMPS_BIN"
+            -in "$INPUT_FILE"
+            -var rho "$RHO"
+            -var n "$N"
+            -var steps "$STEPS"
+        )
         ;;
-    omp)
-        # We use the standard binary but with the OPENMP package flags
-        # Use -np 1 to kill MPI domain decomposition (Fair comparison)
-        echo "--- Running LAMMPS OPENMP: Threads=$CORES (Single Rank), N=$N_DIM, Rho=$RHO ---"
-        
-        module load intel intel-mpi intel-mkl intel-oneapi-tbb
-
-
-        export OMP_NUM_THREADS="$CORES"
-        export OMP_PROC_BIND=close
-        export OMP_PLACES=cores
-         export KMP_SETTINGS=1
-        export KMP_AFFINITY=verbose,granularity=fine,compact,1,0
-
-        # -sf omp: Use the OpenMP package styles
-        # -pk omp $CORES: Allocate X threads to the OpenMP package
-        # -var newton off: Use this if your library does NOT use Newton's 3rd law
-        mpirun -np 1 --bind-to none numactl --localalloc "$INTEL_BIN" \
-            -in "$INPUT_FILE" \
-            -var n "$N_DIM" -var rho "$RHO" -var steps "$STEPS" \
-            -sf omp \
-            -pk omp "$CORES"
-        ;;
-
-    kokkos)
-        if [ ! -f "$KOKKOS_BIN" ]; then echo "Error: Kokkos binary not found!"; exit 1; fi
-        echo "--- Running LAMMPS KOKKOS: T=$CORES, N=$N_DIM, Rho=$RHO ---"
-        
-        module load gcc/14.2.0
-        module load openmpi 
-
-        # 2. Strict MPI-Only Setup (Kills the OpenMP Thrashing)
-        export OMP_NUM_THREADS="$CORES"
-        export OMP_PLACES=cores
-        export OMP_PROC_BIND=close
-
-        # -k on: Initialize Kokkos
-        # t $THREADS: Set OpenMP thread count for Kokkos backend
-        # -sf kk: Use Kokkos-vectorized styles
-        mpirun -np 1 --bind-to none numactl --localalloc "$KOKKOS_BIN" \
-            -k on t "$CORES" -sf kk \
-            -in "$INPUT_FILE" \
-            -var n "$N_DIM" -var rho "$RHO" -var steps "$STEPS"
-        ;;
-
     *)
-        usage
+        echo "Unknown benchmark: $BENCHMARK" >&2
+        exit 1
         ;;
-
-        
 esac
+
+printf "%q " "${CMD[@]}" > "$COMMAND_FILE"
+printf "\n" >> "$COMMAND_FILE"
+
+{
+    echo "Engine: LAMMPS"
+    echo "Config: $CONFIG"
+    echo "Benchmark: $BENCHMARK"
+    echo "Scenario: $SCENARIO"
+    echo "Run ID: $RUN_ID"
+    echo "Run Date: $(date --iso-8601=seconds)"
+    echo "Hostname: $(hostname)"
+    echo "Project Root: $PROJECT_ROOT"
+    echo "Build Dir: $BUILD_DIR"
+    echo "Result Dir: $RESULT_DIR"
+    echo "Command: $(cat "$COMMAND_FILE")"
+    echo "Benchmark Repo Commit: $(git -C "$PROJECT_ROOT" rev-parse HEAD 2>/dev/null || echo unknown)"
+} > "$META_FILE"
+
+echo "Running:"
+echo "  $(cat "$COMMAND_FILE")"
+echo "Result directory:"
+echo "  $RESULT_DIR"
+
+(
+    cd "$RESULT_DIR"
+    "${CMD[@]}" > "$STDOUT_FILE" 2> "$STDERR_FILE"
+)
+
+echo "Done."
+echo "stdout: $STDOUT_FILE"
+echo "stderr: $STDERR_FILE"
+echo "meta:   $META_FILE"

@@ -1,0 +1,110 @@
+# ===================================================================
+# LAMMPS force-dominated linked-cells benchmark
+# Mirrors APRIL BM_LinkedCells_UpdateForcesOnly
+# ===================================================================
+
+processors 1 1 1
+
+# expected from command line:
+# -var n_dim 32
+# -var steps 20
+
+units           lj
+atom_style      atomic
+boundary        f f f
+
+variable        a      equal 1.1225
+variable        sigma  equal 1.0
+variable        eps    equal 3.0
+variable        rc     equal 3.0*v_sigma
+
+variable        Lx equal (v_n_dim-1)*v_a
+variable        Ly equal (v_n_dim-1)*v_a
+variable        Lz equal (v_n_dim-1)*v_a
+
+variable        Ex equal 1.5*v_Lx
+variable        Ey equal 1.5*v_Ly
+variable        Ez equal 1.5*v_Lz
+
+variable        halfEx equal 0.5*v_Ex
+variable        halfEy equal 0.5*v_Ey
+variable        halfEz equal 0.5*v_Ez
+
+region          box block -${halfEx} ${halfEx} -${halfEy} ${halfEy} -${halfEz} ${halfEz} units box
+create_box      1 box
+
+variable        hx equal 0.5*v_Lx
+variable        hy equal 0.5*v_Ly
+variable        hz equal 0.5*v_Lz
+
+variable        ix loop ${n_dim}
+label           loop_x
+
+  variable      iy loop ${n_dim}
+  label         loop_y
+
+    variable    iz loop ${n_dim}
+    label       loop_z
+
+      variable  x equal -v_hx + (v_ix-1)*v_a
+      variable  y equal -v_hy + (v_iy-1)*v_a
+      variable  z equal -v_hz + (v_iz-1)*v_a
+
+      create_atoms 1 single ${x} ${y} ${z} units box
+
+      variable  x delete
+      variable  y delete
+      variable  z delete
+
+      next      iz
+      jump      SELF loop_z
+
+    variable    iz delete
+
+    next        iy
+    jump        SELF loop_y
+
+  variable      iy delete
+
+  next          ix
+  jump          SELF loop_x
+
+variable        ix delete
+
+
+mass            1 1.0
+velocity        all set 0.0 0.0 0.0 units box
+
+pair_style      lj/cut ${rc}
+pair_coeff      1 1 ${eps} ${sigma} ${rc}
+
+neighbor        0.001 bin
+neigh_modify    once yes
+
+thermo          0
+timer           full
+
+# build neighbor list once
+run             0
+
+# one-time pair counting
+compute         plist all pair/local dist
+dump            pdump all local 1 pair_local.dump c_plist
+run             0
+undump          pdump
+
+# timed force loop, skipping repeated pre-run setup
+run             ${steps} pre no post yes
+
+print "n_dim    = ${n_dim}"
+print "atoms    = $(count(all))"
+print "a        = ${a}"
+print "rc       = ${rc}"
+
+compute c1 all property/local patom1 patom2
+compute c2 all pair/local dist
+dump d1 all local 1 pair_ids.dump index c_c1[1] c_c1[2] c_c2
+run 0
+undump d1
+
+

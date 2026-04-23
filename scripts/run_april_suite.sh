@@ -11,7 +11,7 @@ set -euo pipefail
 #
 # Default:
 #   scripts/run_april_suite.sh
-#     uses native-autovec
+#     uses native
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -25,28 +25,36 @@ Usage:
 
 Default:
   $0
-      uses native-autovec
+      uses native
 
 Config examples:
-  scalar-novec
+  generic
+  generic-novec
+  sse
   sse-novec
+  avx2
   avx2-novec
+  avx512
   avx512-novec
+  native
   native-novec
-  native-autovec
+  native-gcc
+  native-gcc-novec
 
 Examples:
   $0
+  $0 native
   $0 native-novec
-  $0 native-autovec
+  $0 native-gcc
+  $0 native-gcc-novec
 
 Argon environment overrides:
-  ARGON_THREADS="1 2 3 4 6 8 11 16 23 32 45 56"  
+  ARGON_THREADS="1 2 3 4 6 8 11 16 23 32 45 56"
   ARGON_N=100
   ARGON_WEAK_BASE_N=32
   ARGON_RHO=0.8442
-  ARGON_DT=0.001
-  ARGON_STEPS=20
+  ARGON_DT=0.005
+  ARGON_STEPS=500
   ARGON_BX=2 ARGON_BY=2 ARGON_BZ=2
   ARGON_SCHEDULE=C08
   ARGON_LAYOUT=SoA
@@ -58,10 +66,10 @@ Valid orderings:
   morton
   none
 
-Valid Executors: 
-    OmpExecutor
-    NativeSpinExecutor
-    NativeBarrierExecutor
+Valid executors:
+  OmpExecutor
+  NativeSpinExecutor
+  NativeBarrierExecutor
 EOF
     exit 1
 }
@@ -70,7 +78,7 @@ if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
     usage
 fi
 
-CONFIG="${1:-native-autovec}"
+CONFIG="${1:-native}"
 
 if [[ ! -x "$APRIL_RUN" ]]; then
     echo "April run script not found or not executable: $APRIL_RUN" >&2
@@ -101,7 +109,7 @@ echo "Running force_kernel_bench"
 echo "============================================================"
 
 SCENARIO=default RUN_ID="$SUITE_TIME" "$APRIL_RUN" "$CONFIG" force_kernel_bench \
-    --benchmark_repetitions=1 \
+    --benchmark_repetitions=3 \
     --benchmark_report_aggregates_only=true \
     --benchmark_out_format=json \
     --benchmark_out=force_kernel_bench.json
@@ -112,7 +120,7 @@ echo "Running april_vs_hardcoded"
 echo "============================================================"
 
 SCENARIO=default RUN_ID="$SUITE_TIME" "$APRIL_RUN" "$CONFIG" april_vs_hardcoded \
-    --benchmark_repetitions=1 \
+    --benchmark_repetitions=3 \
     --benchmark_report_aggregates_only=true \
     --benchmark_out_format=json \
     --benchmark_out=april_vs_hardcoded.json
@@ -147,7 +155,6 @@ case "$ARGON_ORDERING" in
         ;;
 esac
 
-# Roughly powers of 1.5, capped at 32.
 ARGON_THREADS=(${ARGON_THREADS:-1 2 3 4 6 8 11 16 23 32 45 56})
 
 weak_n_for_threads() {

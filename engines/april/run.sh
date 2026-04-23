@@ -7,49 +7,55 @@ set -euo pipefail
 #   results/april/<config>/<benchmark>/<scenario>/<time>/
 #
 # Usage:
-#   engines/april/run.sh <variant> <binary> [binary args...]
+#   engines/april/run.sh <config> <binary> [binary args...]
 #
 # Examples:
-#   engines/april/run.sh native-novec force_kernel_bench
-#   engines/april/run.sh native-novec april_vs_hardcoded
-#   SCENARIO=n32_rho0.8442_t8 engines/april/run.sh native-novec argon_block 32 0.8442 0.001 8 1000 2 2 2 C08 SoA NativeSpinExecutor
+#   engines/april/run.sh native force_kernel_bench
+#   engines/april/run.sh native april_vs_hardcoded
+#   SCENARIO=n32_rho0.8442_t8 engines/april/run.sh native argon_block 32 0.8442 0.001 8 1000 2 2 2 C08 SoA NativeSpinExecutor
 #
 # Optional environment variables:
 #   SCENARIO     Scenario folder name. Default: default
 #   RUN_ID       Time/run folder name. Default: current timestamp
 #   RESULT_ROOT  Override result root directory. Default: <repo>/results/april
 
-module load gcc/14.2.0 cmake ninja
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+module load llvm/20.1.2 gcc/14.2.0
 
 usage() {
     cat >&2 <<EOF
 Usage:
-  $0 <variant> <binary> [binary args...]
+  $0 <config> <binary> [binary args...]
 
 Result layout:
   results/april/<config>/<benchmark>/<scenario>/<time>/
 
-Variant examples:
-  scalar-novec
+Config examples:
+  generic
+  generic-novec
+  sse
   sse-novec
+  avx2
   avx2-novec
+  avx512
   avx512-novec
+  native
   native-novec
-  native-autovec
+  native-gcc
+  native-gcc-novec
 
 Examples:
-  $0 native-novec force_kernel_bench
-  $0 native-novec april_vs_hardcoded
-  SCENARIO=n32_rho0.8442_t8 $0 native-novec argon_block 32 0.8442 0.001 8 1000 2 2 2 C08 SoA NativeSpinExecutor
+  $0 native force_kernel_bench
+  $0 native april_vs_hardcoded
+  SCENARIO=n32_rho0.8442_t8 $0 native argon_block 32 0.8442 0.001 8 1000 2 2 2 C08 SoA NativeSpinExecutor
 
 Argon positional arguments:
   n rho dt threads steps [bx by bz] [schedule] [layout] [executor]
 
 Argon example:
-  $0 native-novec argon_block 32 0.8442 0.001 8 1000 2 2 2 C08 SoA NativeSpinExecutor
+  $0 native argon_block 32 0.8442 0.001 8 1000 2 2 2 C08 SoA NativeSpinExecutor
 
 Known schedules:
   C01 C08 C18 C27 C64 C02_Z C04_XY
@@ -76,21 +82,21 @@ if [[ $# -lt 2 ]]; then
     usage
 fi
 
-VARIANT="$1"
+CONFIG_RAW="$1"
 BINARY_NAME="$2"
 shift 2
 
-CONFIG="$(sanitize_path_component "$VARIANT")"
+CONFIG="$(sanitize_path_component "$CONFIG_RAW")"
 BENCHMARK="$(sanitize_path_component "$BINARY_NAME")"
 SCENARIO="$(sanitize_path_component "${SCENARIO:-default}")"
 RUN_ID="$(sanitize_path_component "${RUN_ID:-$(date +%Y%m%d_%H%M%S)}")"
 
-BUILD_DIR="${PROJECT_ROOT}/build/april-${VARIANT}"
+BUILD_DIR="${PROJECT_ROOT}/build/april-${CONFIG_RAW}"
 BIN="${BUILD_DIR}/bin/${BINARY_NAME}"
 
 if [[ ! -d "$BUILD_DIR" ]]; then
     echo "Build directory not found: $BUILD_DIR" >&2
-    echo "Did you build this variant?" >&2
+    echo "Did you build this config?" >&2
     exit 1
 fi
 
@@ -117,7 +123,7 @@ printf "\n" >> "$COMMAND_FILE"
 {
     echo "Engine: April"
     echo "Config: $CONFIG"
-    echo "Variant: $VARIANT"
+    echo "Config Raw: $CONFIG_RAW"
     echo "Benchmark: $BENCHMARK"
     echo "Binary: $BINARY_NAME"
     echo "Scenario: $SCENARIO"
@@ -154,6 +160,7 @@ echo "  $RESULT_DIR"
 
 START_NS="$(date +%s%N)"
 
+set +e
 (
     cd "$RESULT_DIR"
     if [[ -n "${RUN_PREFIX:-}" ]]; then
@@ -163,6 +170,8 @@ START_NS="$(date +%s%N)"
         "$BIN" "$@" > "$STDOUT_FILE" 2> "$STDERR_FILE"
     fi
 )
+STATUS="$?"
+set -e
 
 END_NS="$(date +%s%N)"
 ELAPSED_NS="$((END_NS - START_NS))"
@@ -170,8 +179,16 @@ ELAPSED_NS="$((END_NS - START_NS))"
 {
     echo
     echo "Wall Time Seconds: $(awk "BEGIN { printf \"%.6f\", ${ELAPSED_NS} / 1000000000 }")"
-    echo "Exit Status: 0"
+    echo "Exit Status: $STATUS"
 } >> "$META_FILE"
+
+if [[ "$STATUS" -ne 0 ]]; then
+    echo "April benchmark failed with exit status $STATUS" >&2
+    echo "stdout: $STDOUT_FILE" >&2
+    echo "stderr: $STDERR_FILE" >&2
+    echo "meta:   $META_FILE" >&2
+    exit "$STATUS"
+fi
 
 echo "Done."
 echo "stdout: $STDOUT_FILE"

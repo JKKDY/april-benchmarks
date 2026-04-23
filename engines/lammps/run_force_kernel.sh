@@ -11,8 +11,8 @@ Usage:
 
 Options:
   --config CONFIG       LAMMPS build config
-                        openmp-serial-generic
-                        openmp-serial-native
+                        openmp-generic
+                        openmp-native
                         intel-generic
                         intel-native
 
@@ -28,7 +28,7 @@ Environment:
   RESULT_ROOT           override result root, default: <repo>/results/lammps
 
 Examples:
-  $0 --config openmp-serial-native --n 100 --steps 20
+  $0 --config openmp-native --n 100 --steps 20
   $0 --config intel-native --n 100 --steps 20
 EOF
     exit 1
@@ -43,7 +43,7 @@ sanitize_path_component() {
     echo "$value"
 }
 
-CONFIG="openmp-serial-native"
+CONFIG="openmp-native"
 N_DIM="32"
 STEPS="20"
 DATAFILE=""
@@ -82,7 +82,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 case "$CONFIG" in
-    openmp-serial-generic|openmp-serial-native|intel-generic|intel-native)
+    openmp-generic|openmp-native|intel-generic|intel-native)
         ;;
     *)
         echo "Unknown config: $CONFIG" >&2
@@ -106,7 +106,7 @@ COMMAND_FILE="${RESULT_DIR}/command.txt"
 CONFIG_FILE="${RESULT_DIR}/configuration.log"
 METRICS_FILE="${RESULT_DIR}/derived_metrics.txt"
 
-LAMMPS_BIN="${PROJECT_ROOT}/build/lammps-${CONFIG}/lmp"
+LAMMPS_BIN="${PROJECT_ROOT}/build/lammps-${CONFIG}/install/bin/lmp"
 INPUT_FILE="${SCRIPT_DIR}/force_kernel_bench.in"
 GRID_SCRIPT="${SCRIPT_DIR}/make_force_kernel_grid.py"
 
@@ -159,7 +159,7 @@ LAMMPS_ARGS=(
 RUN_CMD=()
 
 case "$CONFIG" in
-    openmp-serial-generic|openmp-serial-native)
+    openmp-generic|openmp-native)
         # Keep OpenMP package suffix enabled, but force 1 thread.
         LAMMPS_ARGS+=(-sf omp -pk omp 1)
         RUN_CMD=("$LAMMPS_BIN")

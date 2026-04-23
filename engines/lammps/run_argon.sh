@@ -11,8 +11,8 @@ Usage:
 
 Options:
   --config CONFIG       LAMMPS build config
-                        openmp-serial-generic
-                        openmp-serial-native
+                        openmp-generic
+                        openmp-native
                         intel-generic
                         intel-native
 
@@ -33,9 +33,9 @@ Environment:
   RESULT_ROOT           override result root, default: <repo>/results/lammps
 
 Examples:
-  $0 --config openmp-serial-native --n 100 --steps 500 --dt 0.001 --threads 8
+  $0 --config openmp-native --n 100 --steps 500 --dt 0.001 --threads 8
 
-  $0 --config intel-native --n 100 --steps 500 --dt 0.001 --ranks 4 --threads 1
+  $0 --config intel --n 100 --steps 500 --dt 0.001 --ranks 4 --threads 1
 EOF
     exit 1
 }
@@ -49,7 +49,7 @@ sanitize_path_component() {
     echo "$value"
 }
 
-CONFIG="openmp-serial-native"
+CONFIG="openmp-native"
 N_DIM="100"
 RHO="0.8442"
 STEPS="500"
@@ -113,7 +113,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 case "$CONFIG" in
-    openmp-serial-generic|openmp-serial-native|intel-generic|intel-native)
+    openmp-generic|openmp-native|intel-generic|intel-native)
         ;;
     *)
         echo "Unknown config: $CONFIG" >&2
@@ -204,7 +204,7 @@ LAMMPS_ARGS=(
 RUN_CMD=()
 
 case "$CONFIG" in
-    openmp-serial-generic|openmp-serial-native)
+    openmp-generic|openmp-native)
         LAMMPS_ARGS+=(-sf omp -pk omp "$THREADS")
         RUN_CMD=("$LAMMPS_BIN")
         ;;

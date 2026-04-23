@@ -11,21 +11,21 @@ Usage:
   $0 [<config|all>]
 
 Configs:
-  openmp-serial-generic
-  openmp-serial-native
+  openmp-generic
+  openmp-native
   intel-generic
   intel-native
   all
 
 Default:
   $0
-    builds openmp-serial-native
+    builds openmp-native
 EOF
     exit 1
 }
 
 if [[ $# -eq 0 ]]; then
-    CONFIG="openmp-serial-native"
+    CONFIG="openmp-native"
 else
     CONFIG="$1"
 fi
@@ -51,7 +51,7 @@ build_one() {
     local cc=""
     local cxx=""
 
-    local gcc_common_flags="-O3 -DNDEBUG -fno-math-errno -ffast-math"
+    local clang_common_flags="-O3 -DNDEBUG -fno-math-errno -ffast-math -fopenmp"
     local intel_generic_flags="-O3 -DNDEBUG -fp-model=fast -qopenmp"
     local intel_native_flags="-O3 -DNDEBUG -xHost -qopenmp -qopt-zmm-usage=high -fp-model=fast"
 
@@ -62,25 +62,25 @@ build_one() {
     local intel_lrt_mode=""
 
     case "$config" in
-        openmp-serial-generic)
-            module load gcc/14.2.0 cmake ninja
-            cc="gcc"
-            cxx="g++"
+        openmp-generic)
+            module load llvm/20.1.2 cmake ninja
+            cc="clang"
+            cxx="clang++"
             build_mpi="OFF"
             pkg_intel="OFF"
-            extra_c_flags="$gcc_common_flags"
-            extra_cxx_flags="$gcc_common_flags"
+            extra_c_flags="$clang_common_flags"
+            extra_cxx_flags="$clang_common_flags"
             runtime_hint="Run with 1 process, threads, -sf omp"
             ;;
 
-        openmp-serial-native)
-            module load gcc/14.2.0 cmake ninja
-            cc="gcc"
-            cxx="g++"
+        openmp-native)
+            module load llvm/20.1.2 cmake ninja
+            cc="clang"
+            cxx="clang++"
             build_mpi="OFF"
             pkg_intel="OFF"
-            extra_c_flags="$gcc_common_flags -march=native"
-            extra_cxx_flags="$gcc_common_flags -march=native"
+            extra_c_flags="$clang_common_flags -march=native"
+            extra_cxx_flags="$clang_common_flags -march=native"
             runtime_hint="Run with 1 process, threads, -sf omp"
             ;;
 
@@ -202,8 +202,8 @@ build_one() {
 }
 
 if [[ "$CONFIG" == "all" ]]; then
-    build_one openmp-serial-generic
-    build_one openmp-serial-native
+    build_one openmp-generic
+    build_one openmp-native
     build_one intel-generic
     build_one intel-native
 else

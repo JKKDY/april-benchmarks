@@ -11,7 +11,7 @@ set -euo pipefail
 #
 # Default:
 #   scripts/run_lammps_suite.sh
-#     uses openmp-serial-native and runs both benchmarks
+#     uses openmp-native and runs both benchmarks
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -26,7 +26,7 @@ Usage:
 
 Default:
   $0
-      uses openmp-serial-native
+      uses openmp-native
       runs both force kernel and argon block
 
 Options:
@@ -34,17 +34,17 @@ Options:
                         default: both
 
 Config examples:
-  openmp-serial-generic
-  openmp-serial-native
+  openmp-generic
+  openmp-native
   intel-generic
   intel-native
 
 Examples:
   $0
-  $0 openmp-serial-native
+  $0 openmp-native
   $0 intel-native
   $0 --only force intel-native
-  $0 --only argon openmp-serial-native
+  $0 --only argon openmp-native
   $0 --only both intel-native
 
 Force-kernel overrides:
@@ -73,7 +73,7 @@ EOF
 }
 
 ONLY="both"
-CONFIG="openmp-serial-native"
+CONFIG="openmp-native"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -106,7 +106,7 @@ case "$ONLY" in
 esac
 
 case "$CONFIG" in
-    openmp-serial-generic|openmp-serial-native|intel-generic|intel-native)
+    openmp-generic|openmp-native|intel-generic|intel-native)
         ;;
     *)
         echo "Unknown LAMMPS config: $CONFIG" >&2
@@ -272,9 +272,9 @@ PY
             return 0
         fi
 
-        # The openmp-serial configs cannot use multiple MPI ranks.
-        if [[ "$CONFIG" == openmp-serial-* && "$ranks" -ne 1 ]]; then
-            echo "Skipping ranks=$ranks for serial LAMMPS config: $CONFIG"
+        # openmp-* builds are built without MPI, so they must run with ranks=1.
+        if [[ "$CONFIG" == openmp-* && "$ranks" -ne 1 ]]; then
+            echo "Skipping ranks=$ranks for LAMMPS config: $CONFIG"
             return 0
         fi
 

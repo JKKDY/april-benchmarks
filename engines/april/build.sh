@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-module load gcc/14.2.0 cmake ninja
+module load llvm/20.1.2 gcc/14.2.0 cmake ninja
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -13,56 +13,63 @@ XSIMD_SOURCE_DIR="${PROJECT_ROOT}/external/xsimd"
 usage() {
     cat >&2 <<EOF
 Usage:
-  $0 [<isa|all>] [--allow-auto-vectorization|--disable-auto-vectorization]
+  $0 [<variant|all>] [--novec]
 
-ISA options:
+Variants:
   generic
   sse
   avx2
   avx512
   native
+  native-gcc
   all
 
 Vectorization mode:
-  --allow-auto-vectorization      default, does not add -fno-tree-vectorize
-  --disable-auto-vectorization    adds -fno-tree-vectorize
+  default   allow compiler auto-vectorization
+  --novec   disable compiler auto-vectorization
 
 Defaults:
   $0
-      builds native-autovec
+      builds native
 
   $0 native
-      builds native-autovec
+      builds native
 
 Special behavior:
   $0 all
       builds:
-        generic-autovec
-        sse-autovec
-        avx2-autovec
-        avx512-autovec
+        generic
+        sse
+        avx2
+        avx512
+        native
         native-novec
-        native-autovec
+        native-gcc
+        native-gcc-novec
 
 Build output variants:
-  generic-autovec
+  generic
   generic-novec
-  sse-autovec
+  sse
   sse-novec
-  avx2-autovec
+  avx2
   avx2-novec
-  avx512-autovec
+  avx512
   avx512-novec
-  native-autovec
+  native
   native-novec
+  native-gcc
+  native-gcc-novec
 
 Examples:
   $0
   $0 native
-  $0 native --disable-auto-vectorization
+  $0 native --novec
   $0 avx2
-  $0 avx2 --disable-auto-vectorization
+  $0 avx2 --novec
   $0 avx512
+  $0 native-gcc
+  $0 native-gcc --novec
   $0 all
 EOF
     exit 1
@@ -92,16 +99,23 @@ build_one() {
     local variant="$1"
     local auto_vectorization="$2"
 
-    local common_flags="-fno-math-errno -ffast-math"
-    local vectorization_flag="-fno-tree-vectorize"
+    local compiler_family="clang"
+    local isa_variant="$variant"
 
+    if [[ "$variant" == native-gcc ]]; then
+        compiler_family="gcc"
+        isa_variant="native"
+    fi
+
+    local common_flags="-fno-math-errno -ffast-math"
+    local vectorization_flag=""
     local april_xsimd="ON"
     local explicit_simd_baselines="ON"
     local isa_flags=""
     local extra_cxx_flags=""
     local build_suffix=""
 
-    case "$variant" in
+    case "$isa_variant" in
         generic)
             isa_flags=""
             april_xsimd="ON"
@@ -125,9 +139,24 @@ build_one() {
             ;;
     esac
 
+    if [[ "$auto_vectorization" == "OFF" ]]; then
+        case "$compiler_family" in
+            clang)
+                vectorization_flag="-fno-vectorize -fno-slp-vectorize"
+                ;;
+            gcc)
+                vectorization_flag="-fno-tree-vectorize"
+                ;;
+            *)
+                echo "Unknown compiler family: $compiler_family" >&2
+                exit 1
+                ;;
+        esac
+    fi
+
     if [[ "$auto_vectorization" == "ON" ]]; then
         extra_cxx_flags="$common_flags $isa_flags"
-        build_suffix="${variant}-autovec"
+        build_suffix="$variant"
     else
         extra_cxx_flags="$common_flags $isa_flags $vectorization_flag"
         build_suffix="${variant}-novec"
@@ -135,24 +164,43 @@ build_one() {
 
     local build_dir="${PROJECT_ROOT}/build/april-${build_suffix}"
 
-    export CC="${CC:-gcc}"
-    export CXX="${CXX:-g++}"
+    local cc=""
+    local cxx=""
+    case "$compiler_family" in
+        clang)
+            cc="${CC:-clang}"
+            cxx="${CXX:-clang++}"
+            ;;
+        gcc)
+            cc="${CC:-gcc}"
+            cxx="${CXX:-g++}"
+            ;;
+        *)
+            echo "Unknown compiler family: $compiler_family" >&2
+            exit 1
+            ;;
+    esac
 
     echo
     echo "============================================================"
     echo "Building April benchmark config: $build_suffix"
     echo "============================================================"
-    echo "ISA Variant: $variant"
+    echo "Variant: $variant"
+    echo "Compiler Family: $compiler_family"
+    echo "ISA Variant: $isa_variant"
     echo "Auto-vectorization: $auto_vectorization"
     echo "Extra CXX Flags: $extra_cxx_flags"
     echo "Build Dir: $build_dir"
     echo
 
+    CC="$cc" CXX="$cxx" \
     cmake -S "$SCRIPT_DIR" \
           -B "$build_dir" \
           -G Ninja \
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+          -DCMAKE_C_COMPILER="$cc" \
+          -DCMAKE_CXX_COMPILER="$cxx" \
           -DCMAKE_CXX_FLAGS="$extra_cxx_flags" \
           -DFETCHCONTENT_SOURCE_DIR_APRIL="$APRIL_SOURCE_DIR" \
           -DFETCHCONTENT_SOURCE_DIR_GOOGLEBENCHMARK="$GBENCH_SOURCE_DIR" \
@@ -167,14 +215,16 @@ build_one() {
 
     {
         echo "Engine: April"
-        echo "ISA Variant: $variant"
+        echo "Variant: $variant"
+        echo "ISA Variant: $isa_variant"
         echo "Build Variant: $build_suffix"
+        echo "Compiler Family: $compiler_family"
         echo "Auto-vectorization: $auto_vectorization"
         echo "Build Date: $(date --iso-8601=seconds)"
         echo "Project Root: $PROJECT_ROOT"
         echo "Build Dir: $build_dir"
-        echo "CC: $(command -v "$CC")"
-        echo "CXX: $(command -v "$CXX")"
+        echo "CC: $(command -v "$cc")"
+        echo "CXX: $(command -v "$cxx")"
         echo "Extra CXX Flags: $extra_cxx_flags"
         echo "CMAKE_BUILD_TYPE: Release"
         echo "APRIL_ENABLE_OPENMP: ON"
@@ -215,10 +265,7 @@ fi
 
 for arg in "${@:2}"; do
     case "$arg" in
-        --allow-auto-vectorization)
-            AUTO_VECTORIZATION="ON"
-            ;;
-        --disable-auto-vectorization)
+        --novec)
             AUTO_VECTORIZATION="OFF"
             ;;
         -h|--help)
@@ -238,18 +285,22 @@ if [[ "$VARIANT" == "all" ]]; then
     build_one sse ON
     build_one avx2 ON
     build_one avx512 ON
-    build_one native OFF
     build_one native ON
+    build_one native OFF
+    build_one native-gcc ON
+    build_one native-gcc OFF
 
     echo
     echo "All April benchmark configs built."
     echo "Builds:"
-    echo "  ${PROJECT_ROOT}/build/april-generic-autovec"
-    echo "  ${PROJECT_ROOT}/build/april-sse-autovec"
-    echo "  ${PROJECT_ROOT}/build/april-avx2-autovec"
-    echo "  ${PROJECT_ROOT}/build/april-avx512-autovec"
+    echo "  ${PROJECT_ROOT}/build/april-generic"
+    echo "  ${PROJECT_ROOT}/build/april-sse"
+    echo "  ${PROJECT_ROOT}/build/april-avx2"
+    echo "  ${PROJECT_ROOT}/build/april-avx512"
+    echo "  ${PROJECT_ROOT}/build/april-native"
     echo "  ${PROJECT_ROOT}/build/april-native-novec"
-    echo "  ${PROJECT_ROOT}/build/april-native-autovec"
+    echo "  ${PROJECT_ROOT}/build/april-native-gcc"
+    echo "  ${PROJECT_ROOT}/build/april-native-gcc-novec"
 else
     build_one "$VARIANT" "$AUTO_VECTORIZATION"
 fi

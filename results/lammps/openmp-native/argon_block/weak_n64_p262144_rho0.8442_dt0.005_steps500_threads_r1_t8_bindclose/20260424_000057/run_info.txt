@@ -1,0 +1,81 @@
+Engine: LAMMPS
+Config: openmp-native
+Benchmark: argon_block
+Scenario: weak_n64_p262144_rho0.8442_dt0.005_steps500_threads_r1_t8_bindclose
+Run ID: 20260424_000057
+Run Date: 2026-04-24T00:17:14+02:00
+Hostname: cm4r15c06s08
+Project Root: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks
+Result Dir: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/openmp-native/argon_block/weak_n64_p262144_rho0.8442_dt0.005_steps500_threads_r1_t8_bindclose/20260424_000057
+Working Dir: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/openmp-native/argon_block/weak_n64_p262144_rho0.8442_dt0.005_steps500_threads_r1_t8_bindclose/20260424_000057
+LAMMPS Binary: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-openmp-native/install/bin/lmp
+Input File: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/engines/lammps/argon_block.in
+Datafile: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/openmp-native/argon_block/weak_n64_p262144_rho0.8442_dt0.005_steps500_threads_r1_t8_bindclose/20260424_000057/argon_grid_n64_rho0.8442.data
+n_dim: 64
+rho: 0.8442
+steps: 500
+dt: 0.005
+ranks: 1
+threads: 8
+bind: close
+Command: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-openmp-native/install/bin/lmp -in /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/engines/lammps/argon_block.in -var datafile /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/openmp-native/argon_block/weak_n64_p262144_rho0.8442_dt0.005_steps500_threads_r1_t8_bindclose/20260424_000057/argon_grid_n64_rho0.8442.data -var rho 0.8442 -var n 64 -var steps 500 -var dt 0.005 -sf omp -pk omp 8 
+Benchmark Repo Commit: unknown
+
+Environment:
+  OMP_NUM_THREADS=8
+  OMP_PLACES=cores
+  OMP_PROC_BIND=close
+  OMP_DYNAMIC=FALSE
+  KMP_AFFINITY=unset
+  KMP_BLOCKTIME=unset
+  SLURM_JOB_ID=361874
+  SLURM_CPUS_PER_TASK=unset
+
+Build Info:
+Engine: LAMMPS
+Config: openmp-native
+Build Date: 2026-04-23T18:04:05+02:00
+Project Root: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks
+Build Dir: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-openmp-native
+Install Dir: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-openmp-native/install
+CC: /lrz/sys/compilers/llvm/20.1.2/bin/clang
+CXX: /lrz/sys/compilers/llvm/20.1.2/bin/clang++
+Extra C Flags: -O3 -DNDEBUG -fno-math-errno -ffast-math -fopenmp -march=native
+Extra CXX Flags: -O3 -DNDEBUG -fno-math-errno -ffast-math -fopenmp -march=native
+CMAKE_BUILD_TYPE: Release
+BUILD_MPI: OFF
+BUILD_OMP: ON
+PKG_OPENMP: ON
+PKG_INTEL: OFF
+Runtime Hint: Run with 1 process, threads, -sf omp
+CMake: cmake version 3.30.0
+Ninja: 1.12.1
+LAMMPS Source Dir: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/external/lammps
+LAMMPS Commit: unknown
+Benchmark Repo Commit: unknown
+
+Wall Time Seconds: 11.685004
+Exit Status: 0
+config=openmp-native
+benchmark=argon_block
+scenario=weak_n64_p262144_rho0.8442_dt0.005_steps500_threads_r1_t8_bindclose
+run_id=20260424_000057
+n_dim=64
+atoms=262144
+rho=0.8442
+steps=500
+dt=0.005
+ranks=1
+threads=8
+bind=close
+loop_time_s=10.221
+timesteps_per_second=unknown
+matom_step_per_second=12.824
+cpu_use_percent=797.7%
+pair_time_s=5.0581
+neigh_time_s=3.8847
+comm_time_s=0.59094
+modify_time_s=0.29791
+total_neighbors=9886951
+neighbor_list_builds=83
+wall_time_s=11.685004

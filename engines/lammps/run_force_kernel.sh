@@ -161,6 +161,8 @@ RUN_CMD=()
 case "$CONFIG" in
     openmp-generic|openmp-native)
         # Keep OpenMP package suffix enabled, but force 1 thread.
+        module load llvm/20.1.2
+
         LAMMPS_ARGS+=(-sf omp -pk omp 1)
         RUN_CMD=("$LAMMPS_BIN")
         ;;

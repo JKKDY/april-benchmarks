@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+module load llvm/20.1.2
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
@@ -35,7 +37,7 @@ Environment:
 Examples:
   $0 --config openmp-native --n 100 --steps 500 --dt 0.001 --threads 8
 
-  $0 --config intel --n 100 --steps 500 --dt 0.001 --ranks 4 --threads 1
+  $0 --config intel-native --n 100 --steps 500 --dt 0.001 --ranks 4 --threads 1
 EOF
     exit 1
 }
@@ -205,6 +207,7 @@ RUN_CMD=()
 
 case "$CONFIG" in
     openmp-generic|openmp-native)
+        module load llvm/20.1.2
         LAMMPS_ARGS+=(-sf omp -pk omp "$THREADS")
         RUN_CMD=("$LAMMPS_BIN")
         ;;

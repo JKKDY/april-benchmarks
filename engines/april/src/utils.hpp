@@ -31,7 +31,7 @@ Benchmark::BenchmarkResult run_simulation(
     auto system = build_system(std::forward<Env>(env), std::forward<Container>(container), exec_config);
 
     VelocityVerlet warmup_integrator(system, monitors<>);
-    warmup_integrator.run_for_steps(0.005, warmup_steps);
+    warmup_integrator.run_for_steps(dt, warmup_steps);
 
     Benchmark::BenchmarkResult res;
     VelocityVerlet bench_integrator(system, monitors<Benchmark, BinaryOutput, ProgressBar>);

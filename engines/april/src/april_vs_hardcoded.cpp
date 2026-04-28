@@ -66,10 +66,11 @@ static void BM_Baseline_Handcoded_AoS_Scalar(benchmark::State& state) {
         for (int k = 0; k < N_DIM; ++k) {
             for (int j = 0; j < N_DIM; ++j) {
                 for (int i = 0; i < N_DIM; ++i) {
-                    particles[idx++].position = {i * A + off_x, j * A + off_y, k * A + off_z};
-                    particles[idx++].old_position = {};
-                    particles[idx++].velocity = {};
-                    particles[idx++].force = {};
+                    particles[idx].position = {i * A + off_x, j * A + off_y, k * A + off_z};
+                    particles[idx].old_position = {};
+                    particles[idx].velocity = {};
+                    particles[idx].force = {};
+                    idx++;
                 }
             }
         }

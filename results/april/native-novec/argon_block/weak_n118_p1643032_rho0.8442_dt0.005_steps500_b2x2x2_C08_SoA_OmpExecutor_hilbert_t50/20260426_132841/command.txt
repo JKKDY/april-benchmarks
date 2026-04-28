@@ -1,0 +1,1 @@
+/dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/april-native-novec/bin/argon_block 118 0.8442 0.005 50 500 2 2 2 C08 SoA OmpExecutor hilbert weak_scaling 

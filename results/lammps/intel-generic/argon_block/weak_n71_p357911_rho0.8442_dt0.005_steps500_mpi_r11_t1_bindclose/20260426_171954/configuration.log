@@ -1,0 +1,16 @@
+config=intel-generic
+benchmark=argon_block
+scenario=weak_n71_p357911_rho0.8442_dt0.005_steps500_mpi_r11_t1_bindclose
+run_id=20260426_171954
+n_dim=71
+atoms=357911
+rho=0.8442
+steps=500
+dt=0.005
+ranks=11
+threads=1
+bind=close
+datafile=/dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/intel-generic/argon_block/weak_n71_p357911_rho0.8442_dt0.005_steps500_mpi_r11_t1_bindclose/20260426_171954/argon_grid_n71_rho0.8442.data
+input_file=/dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/engines/lammps/argon_block.in
+lammps_bin=/dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-intel-generic/install/bin/lmp
+command=mpirun -np 11 /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-intel-generic/install/bin/lmp -in /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/engines/lammps/argon_block.in -var datafile /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/intel-generic/argon_block/weak_n71_p357911_rho0.8442_dt0.005_steps500_mpi_r11_t1_bindclose/20260426_171954/argon_grid_n71_rho0.8442.data -var rho 0.8442 -var n 71 -var steps 500 -var dt 0.005 -sf intel -pk intel 1 mode double 

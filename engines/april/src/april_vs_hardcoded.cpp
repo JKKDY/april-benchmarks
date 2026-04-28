@@ -27,12 +27,14 @@ static constexpr double c12_scalar = 48.0 * EPSILON * sigma6 * sigma6;
 namespace baseline {
     struct Particle {
         vec3 position = {};
+        vec3 old_position = {};
         vec3 force = {};
         vec3 velocity = {};
     };
 
     struct StateSoA {
         std::vector<double> x, y, z;
+        std::vector<double> ox, oy, oz;
         std::vector<double> vx, vy, vz;
         std::vector<double> fx, fy, fz;
 
@@ -65,6 +67,9 @@ static void BM_Baseline_Handcoded_AoS_Scalar(benchmark::State& state) {
             for (int j = 0; j < N_DIM; ++j) {
                 for (int i = 0; i < N_DIM; ++i) {
                     particles[idx++].position = {i * A + off_x, j * A + off_y, k * A + off_z};
+                    particles[idx++].old_position = {};
+                    particles[idx++].velocity = {};
+                    particles[idx++].force = {};
                 }
             }
         }
@@ -75,9 +80,14 @@ static void BM_Baseline_Handcoded_AoS_Scalar(benchmark::State& state) {
         for (int step = 0; step < STEPS; ++step) {
 
             // first half pick
-            for (auto& [position, force, velocity] : particles) {
+            for (auto& [position, old_position, force, velocity] : particles) {
+                old_position = position;
                 velocity += (DT / 2.0) * (force / MASS);
                 position += DT * velocity;
+                force = {};
+            }
+
+            for (auto& [position, old_position, force, velocity] : particles) {
                 force = {};
             }
 
@@ -86,26 +96,18 @@ static void BM_Baseline_Handcoded_AoS_Scalar(benchmark::State& state) {
                 for (size_t j = i + 1; j < N; ++j) {
                     auto& p2 = particles[j];
 
-                    const double dx = p2.position.x - p1.position.x;
-                    const double dy = p2.position.y - p1.position.y;
-                    const double dz = p2.position.z - p1.position.z;
+                    const vec3 r = p2.position - p1.position;
+                    const double r2 = r.x*r.x + r.y*r.y + r.z*r.z;
 
-                    const double r2 = (dx * dx) + (dy * dy) + (dz * dz);
                     if (r2 < r_cut2) {
                         const double inv_r2 = 1.0 / r2;
                         const double inv_r6 = inv_r2 * inv_r2 * inv_r2;
                         const double mag = (c12_scalar * inv_r6 - c6_scalar) * inv_r6 * inv_r2;
 
-                        const double fx = -mag * dx;
-                        const double fy = -mag * dy;
-                        const double fz = -mag * dz;
+                        const vec3 f = r * -mag;
 
-                        p1.force.x += fx;
-                        p1.force.y += fy;
-                        p1.force.z += fz;
-                        p2.force.x -= fx;
-                        p2.force.y -= fy;
-                        p2.force.z -= fz;
+                        p1.force += f;
+                        p2.force -= f;
                     }
                 }
             }
@@ -160,6 +162,10 @@ static void BM_Baseline_Handcoded_SoA_Scalar(benchmark::State& state) {
         for (int step = 0; step < STEPS; ++step) {
             // first half pick
             for (size_t i = 0; i < N; ++i) {
+                p.ox[i] = p.x[i];
+                p.oy[i] = p.y[i];
+                p.oz[i] = p.z[i];
+
                 p.vx[i] += (DT / 2.0) * (p.fx[i] / MASS);
                 p.vy[i] += (DT / 2.0) * (p.fy[i] / MASS);
                 p.vz[i] += (DT / 2.0) * (p.fz[i] / MASS);
@@ -167,7 +173,9 @@ static void BM_Baseline_Handcoded_SoA_Scalar(benchmark::State& state) {
                 p.x[i] += DT * p.vx[i];
                 p.y[i] += DT * p.vy[i];
                 p.z[i] += DT * p.vz[i];
+            }
 
+            for (size_t i = 0; i < N; ++i) {
                 p.fx[i] = 0.0;
                 p.fy[i] = 0.0;
                 p.fz[i] = 0.0;

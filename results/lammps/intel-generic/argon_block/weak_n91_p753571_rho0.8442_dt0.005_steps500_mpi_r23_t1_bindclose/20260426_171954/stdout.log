@@ -1,0 +1,148 @@
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+LAMMPS (22 Jul 2025 - Update 4)
+  using 1 OpenMP thread(s) per MPI task
+Reading data file ...
+  orthogonal box = (-48.142608 -48.142608 -48.142608) to (48.142608 48.142608 48.142608)
+  1 by 1 by 23 MPI processor grid
+  reading atoms ...
+  753571 atoms
+  read_data CPU = 1.139 seconds
+N        = 753571
+atoms    = 753571
+L        = 96.2852161564966
+spacing  = 1.05807929842304
+rho      = 0.8442
+dt       = 0.005
+steps    = 500
+----------------------------------------------------------
+Using INTEL Package without Coprocessor.
+Compiler: Intel LLVM C++ 202401.0 / Intel(R) oneAPI DPC++/C++ Compiler 2024.1.0 (2024.1.0.20240308)
+SIMD compiler directives: Enabled
+Precision: double
+----------------------------------------------------------
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 2.8
+  ghost atom cutoff = 2.8
+  binsize = 1.4, bins = 69 69 69
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair lj/cut/intel, perpetual
+      attributes: half, newton on, intel
+      pair build: half/bin/newton/intel
+      stencil: half/bin/3d/intel
+      bin: intel
+Setting up Verlet run ...
+  Unit style    : lj
+  Current step  : 0
+  Time step     : 0.005
+Per MPI rank memory allocation (min/avg/max) = 234.2 | 301.2 | 305.3 Mbytes
+   Step        Atoms         Temp          PotEng         KinEng         TotEng         Press     
+         0      753571   1             -5.2202185      1.499998      -3.7202205      2.6664648    
+Loop time of 2.49152e-06 on 23 procs for 0 steps with 753571 atoms
+
+108.2% CPU use with 23 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 2.492e-06  |            |       |100.00
+
+Nlocal:          32764 ave       33124 max       24843 min
+Histogram: 1 0 0 0 0 0 0 0 0 22
+Nghost:        54371.6 ave       60966 max       51557 min
+Histogram: 16 0 0 0 0 0 0 0 1 6
+Neighs:    1.31056e+06 ave 1.32496e+06 max      993720 min
+Histogram: 1 0 0 0 0 0 0 0 0 22
+
+Total # of neighbors = 30142840
+Ave neighs/atom = 40
+Neighbor list builds = 0
+Dangerous builds = 0
+----------------------------------------------------------
+Using INTEL Package without Coprocessor.
+Compiler: Intel LLVM C++ 202401.0 / Intel(R) oneAPI DPC++/C++ Compiler 2024.1.0 (2024.1.0.20240308)
+SIMD compiler directives: Enabled
+Precision: double
+----------------------------------------------------------
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Setting up Verlet run ...
+  Unit style    : lj
+  Current step  : 0
+  Time step     : 0.005
+Per MPI rank memory allocation (min/avg/max) = 234.2 | 301.2 | 305.3 Mbytes
+   Step        Atoms         Temp          PotEng         KinEng         TotEng         Press     
+         0      753571   1             -5.2202185      1.499998      -3.7202205      2.6664648    
+        50      753571   1.027443      -5.2566206      1.5411624     -3.7154582      2.6476339    
+Loop time of 0.603182 on 23 procs for 50 steps with 753571 atoms
+
+----------------------------------------------------------
+Using INTEL Package without Coprocessor.
+Compiler: Intel LLVM C++ 202401.0 / Intel(R) oneAPI DPC++/C++ Compiler 2024.1.0 (2024.1.0.20240308)
+SIMD compiler directives: Enabled
+Precision: double
+----------------------------------------------------------
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Setting up Verlet run ...
+  Unit style    : lj
+  Current step  : 0
+  Time step     : 0.005
+Per MPI rank memory allocation (min/avg/max) = 283.7 | 303.3 | 305.3 Mbytes
+   Step        Atoms         Temp          PotEng         KinEng         TotEng         Press     
+         0      753571   1.027443      -5.2566206      1.5411624     -3.7154582      2.6476339    
+       500      753571   1.0525447     -5.2871354      1.5788149     -3.7083205      2.8699365    
+Loop time of 7.62564 on 23 procs for 500 steps with 753571 atoms
+
+Performance: 28325.478 tau/day, 65.568 timesteps/s, 49.410 Matom-step/s
+99.9% CPU use with 23 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 3.7431     | 3.8683     | 3.9652     |   2.5 | 50.73
+Neigh   | 2.7179     | 2.7432     | 2.7747     |   0.8 | 35.97
+Comm    | 0.48225    | 0.55771    | 0.70548    |   7.1 |  7.31
+Output  | 9.5739e-05 | 0.00028416 | 0.00059902 |   0.0 |  0.00
+Modify  | 0.19566    | 0.20796    | 0.22554    |   1.8 |  2.73
+Other   |            | 0.2482     |            |       |  3.25
+
+Nlocal:          32764 ave       32835 max       32684 min
+Histogram: 2 2 2 1 2 4 3 3 1 3
+Nghost:          53005 ave       53091 max       52855 min
+Histogram: 1 2 0 1 1 3 5 2 5 3
+Neighs:    1.23564e+06 ave  1.2436e+06 max 1.22722e+06 min
+Histogram: 2 1 1 2 5 5 1 3 1 2
+
+Total # of neighbors = 28419816
+Ave neighs/atom = 37.713521
+Neighbor list builds = 84
+Dangerous builds = 0
+Total wall time: 0:00:09

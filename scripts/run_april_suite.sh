@@ -109,7 +109,7 @@ echo "Running force_kernel_bench"
 echo "============================================================"
 
 SCENARIO=default RUN_ID="$SUITE_TIME" "$APRIL_RUN" "$CONFIG" force_kernel_bench \
-    --benchmark_repetitions=3 \
+    --benchmark_repetitions=1 \
     --benchmark_report_aggregates_only=true \
     --benchmark_out_format=json \
     --benchmark_out=force_kernel_bench.json
@@ -120,7 +120,7 @@ echo "Running april_vs_hardcoded"
 echo "============================================================"
 
 SCENARIO=default RUN_ID="$SUITE_TIME" "$APRIL_RUN" "$CONFIG" april_vs_hardcoded \
-    --benchmark_repetitions=3 \
+    --benchmark_repetitions=1 \
     --benchmark_report_aggregates_only=true \
     --benchmark_out_format=json \
     --benchmark_out=april_vs_hardcoded.json

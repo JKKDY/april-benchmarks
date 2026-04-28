@@ -1,0 +1,13 @@
+config=intel-native
+benchmark=force_kernel_bench
+scenario=n50_singlecore_steps100
+run_id=20260426_171020
+n_dim=50
+atoms=125000
+steps=100
+ranks=1
+threads=1
+datafile=/dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/intel-native/force_kernel_bench/n50_singlecore_steps100/20260426_171020/force_kernel_grid_n50.data
+input_file=/dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/engines/lammps/force_kernel_bench.in
+lammps_bin=/dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-intel-native/install/bin/lmp
+command=mpirun -np 1 /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-intel-native/install/bin/lmp -in /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/engines/lammps/force_kernel_bench.in -var datafile /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/intel-native/force_kernel_bench/n50_singlecore_steps100/20260426_171020/force_kernel_grid_n50.data -var n_dim 50 -var steps 100 -sf intel -pk intel 1 

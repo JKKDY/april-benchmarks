@@ -1,0 +1,14 @@
+---------------------------------------------------------------------------------------------------------------------------
+Benchmark                                                                 Time             CPU   Iterations UserCounters...
+---------------------------------------------------------------------------------------------------------------------------
+BM_April_DirectSum<Layout::AoS, VectorPolicy::Scalar>/16/500           4514 ms         4514 ms            1 items_per_second=929.031M/s ns/interaction=1.07639s
+BM_April_DirectSum<Layout::SoA, VectorPolicy::Scalar>/16/500           5073 ms         5073 ms            1 items_per_second=826.641M/s ns/interaction=1.20972s
+BM_April_DirectSum<Layout::AoSoA<>, VectorPolicy::Scalar>/16/500       4854 ms         4853 ms            1 items_per_second=863.996M/s ns/interaction=1.15741s
+BM_April_DirectSum<Layout::SoA, VectorPolicy::Auto>/16/500             1428 ms         1428 ms            1 items_per_second=2.9375G/s ns/interaction=0.340426s
+BM_April_DirectSum<Layout::AoSoA<>, VectorPolicy::Auto>/16/500         1422 ms         1421 ms            1 items_per_second=2.94994G/s ns/interaction=0.338989s
+BM_April_DirectSum<Layout::AoSoA<16>, VectorPolicy::Auto>/16/500       1418 ms         1418 ms            1 items_per_second=2.95798G/s ns/interaction=0.338068s
+BM_April_DirectSum<Layout::AoSoA<32>, VectorPolicy::Auto>/16/500       1648 ms         1648 ms            1 items_per_second=2.54479G/s ns/interaction=0.39296s
+BM_Baseline_Handcoded_AoS_Scalar/16/500                                4270 ms         4269 ms            1 items_per_second=982.209M/s ns/interaction=1.01811s
+BM_Baseline_Handcoded_SoA_Scalar/16/500                                4560 ms         4559 ms            1 items_per_second=919.772M/s ns/interaction=1.08723s
+BM_Baseline_Handcoded_SoA_2D_SIMD/16/500                               1444 ms         1443 ms            1 items_per_second=2.90538G/s ns/interaction=0.344189s
+BM_Baseline_Handcoded_SoA_1D_SIMD/16/500                               1936 ms         1935 ms            1 items_per_second=2.16681G/s ns/interaction=0.461507s

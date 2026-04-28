@@ -1,0 +1,12 @@
+config=intel-native
+benchmark=force_kernel_bench
+scenario=n50_singlecore_steps100
+run_id=20260426_174418
+n_dim=50
+atoms=125000
+steps=100
+pair_time_s=1.5906
+neighbors_per_step=4712572
+ns_per_interaction=3.37522695
+interactions_per_second=296276374
+wall_time_s=4.356827

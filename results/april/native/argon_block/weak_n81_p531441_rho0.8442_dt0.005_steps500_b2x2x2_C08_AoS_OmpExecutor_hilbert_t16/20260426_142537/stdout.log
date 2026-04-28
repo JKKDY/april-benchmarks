@@ -1,0 +1,19 @@
+
+----------------------------------------
+ [APRIL BENCHMARK REPORT] 
+----------------------------------------
+  Steps processed:    500
+  Particles processed: 265720500
+  Wall time (total):  14.89973 s
+  Integration time:   14.89963 s
+----------------------------------------
+  Throughput:         33.56 it/s
+  Performance:        17.83 MUPS
+----------------------------------------
+  Avg step time:      0.029799 s
+  Median step time:   0.029804 s
+  Min step time:      0.029366 s
+  Max step time:      0.031578 s
+  Std Deviation:      0.000169 s
+----------------------------------------
+

@@ -1,0 +1,12 @@
+config=intel-generic
+benchmark=force_kernel_bench
+scenario=n50_singlecore_steps100
+run_id=20260426_171954
+n_dim=50
+atoms=125000
+steps=100
+pair_time_s=2.3106
+neighbors_per_step=4712572
+ns_per_interaction=4.90305506
+interactions_per_second=203954471
+wall_time_s=5.105336

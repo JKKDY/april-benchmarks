@@ -1,0 +1,126 @@
+MPI startup(): Warning: I_MPI_PMI_LIBRARY will be ignored since the hydra process manager was found
+LAMMPS (22 Jul 2025 - Update 4)
+  using 32 OpenMP thread(s) per MPI task
+Reading data file ...
+  orthogonal box = (-53.962044 -53.962044 -53.962044) to (53.962044 53.962044 53.962044)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  1061208 atoms
+  read_data CPU = 1.975 seconds
+N        = 1061208
+atoms    = 1061208
+L        = 107.92408843915
+spacing  = 1.05807929842304
+rho      = 0.8442
+dt       = 0.0000001
+steps    = 500
+----------------------------------------------------------
+Using INTEL Package without Coprocessor.
+Compiler: Intel LLVM C++ 202401.0 / Intel(R) oneAPI DPC++/C++ Compiler 2024.1.0 (2024.1.0.20240308)
+SIMD compiler directives: Enabled
+Precision: double
+----------------------------------------------------------
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 2.8
+  ghost atom cutoff = 2.8
+  binsize = 1.4, bins = 78 78 78
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair lj/cut/intel, perpetual
+      attributes: half, newton on, intel
+      pair build: half/bin/newton/intel
+      stencil: half/bin/3d/intel
+      bin: intel
+Setting up Verlet run ...
+  Unit style    : lj
+  Current step  : 0
+  Time step     : 1e-07
+Per MPI rank memory allocation (min/avg/max) = 1.173e+04 | 1.173e+04 | 1.173e+04 Mbytes
+   Step        Atoms         Temp          PotEng         KinEng         TotEng         Press     
+         0     1061208   1             -5.2202185      1.4999986     -3.7202199      2.6664651    
+Loop time of 1.545e-06 on 32 procs for 0 steps with 1061208 atoms
+
+388.3% CPU use with 1 MPI tasks x 32 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 1.545e-06  |            |       |100.00
+
+Nlocal:    1.06121e+06 ave 1.06121e+06 max 1.06121e+06 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:         198504 ave      198504 max      198504 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    4.24483e+07 ave 4.24483e+07 max 4.24483e+07 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 42448320
+Ave neighs/atom = 40
+Neighbor list builds = 0
+Dangerous builds = 0
+----------------------------------------------------------
+Using INTEL Package without Coprocessor.
+Compiler: Intel LLVM C++ 202401.0 / Intel(R) oneAPI DPC++/C++ Compiler 2024.1.0 (2024.1.0.20240308)
+SIMD compiler directives: Enabled
+Precision: double
+----------------------------------------------------------
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Setting up Verlet run ...
+  Unit style    : lj
+  Current step  : 0
+  Time step     : 1e-07
+Per MPI rank memory allocation (min/avg/max) = 1.173e+04 | 1.173e+04 | 1.173e+04 Mbytes
+   Step        Atoms         Temp          PotEng         KinEng         TotEng         Press     
+         0     1061208   1             -5.2202185      1.4999986     -3.7202199      2.6664651    
+        50     1061208   0.99999999    -5.2202185      1.4999986     -3.7202199      2.6664652    
+Loop time of 1.9951 on 32 procs for 50 steps with 1061208 atoms
+
+----------------------------------------------------------
+Using INTEL Package without Coprocessor.
+Compiler: Intel LLVM C++ 202401.0 / Intel(R) oneAPI DPC++/C++ Compiler 2024.1.0 (2024.1.0.20240308)
+SIMD compiler directives: Enabled
+Precision: double
+----------------------------------------------------------
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Setting up Verlet run ...
+  Unit style    : lj
+  Current step  : 0
+  Time step     : 1e-07
+Per MPI rank memory allocation (min/avg/max) = 1.173e+04 | 1.173e+04 | 1.173e+04 Mbytes
+   Step        Atoms         Temp          PotEng         KinEng         TotEng         Press     
+         0     1061208   0.99999999    -5.2202185      1.4999986     -3.7202199      2.6664652    
+       500     1061208   0.99999906    -5.2202171      1.4999972     -3.7202199      2.6664704    
+Loop time of 19.8667 on 32 procs for 500 steps with 1061208 atoms
+
+Performance: 0.217 tau/day, 25.168 timesteps/s, 26.708 Matom-step/s
+1848.5% CPU use with 1 MPI tasks x 32 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 9.2288     | 9.2288     | 9.2288     |   0.0 | 46.45
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 1.2073     | 1.2073     | 1.2073     |   0.0 |  6.08
+Output  | 0.0039812  | 0.0039812  | 0.0039812  |   0.0 |  0.02
+Modify  | 6.8179     | 6.8179     | 6.8179     |   0.0 | 34.32
+Other   |            | 2.609      |            |       | 13.13
+
+Nlocal:    1.06121e+06 ave 1.06121e+06 max 1.06121e+06 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:         198504 ave      198504 max      198504 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    4.24483e+07 ave 4.24483e+07 max 4.24483e+07 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 42448320
+Ave neighs/atom = 40
+Neighbor list builds = 0
+Dangerous builds = 0
+Total wall time: 0:00:24

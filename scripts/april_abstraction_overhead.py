@@ -44,7 +44,7 @@ def main() -> int:
     parser.add_argument(
         "--out-dir",
         type=Path,
-        default=Path("analysis/plots"),
+        default=Path("figures/"),
     )
     args = parser.parse_args()
 
@@ -60,45 +60,113 @@ def main() -> int:
     # Use total Google Benchmark wall-clock time.
     df["real_time"] = pd.to_numeric(df["real_time"], errors="coerce")
 
-    order = [
-        "APRIL AoS scalar",
-        "Handwritten AoS scalar",
-        "APRIL SoA scalar",
-        "Handwritten SoA scalar",
-        "APRIL SoA SIMD",
-        "APRIL AoSoA SIMD",
-        "Handwritten SoA 2D SIMD",
+    groups = [
+        (
+            "AoS scalar",
+            [
+                "APRIL AoS scalar",
+                "Handwritten AoS scalar",
+            ],
+        ),
+        (
+            "SoA scalar",
+            [
+                "APRIL SoA scalar",
+                "Handwritten SoA scalar",
+            ],
+        ),
+        (
+            "SIMD",
+            [
+                "APRIL SoA SIMD",
+                "APRIL AoSoA SIMD",
+                "Handwritten SoA 2D SIMD",
+            ],
+        ),
     ]
 
-    df = df[df["label"].isin(order)].copy()
-    df["label"] = pd.Categorical(df["label"], categories=order, ordered=True)
-    df = df.sort_values("label")
+    display_labels = {
+        "APRIL AoS scalar": "APRIL",
+        "Handwritten AoS scalar": "Handwritten",
+        "APRIL SoA scalar": "APRIL",
+        "Handwritten SoA scalar": "Handwritten",
+        "APRIL SoA SIMD": "APRIL\nSoA",
+        "APRIL AoSoA SIMD": "APRIL\nAoSoA",
+        "Handwritten SoA 2D SIMD": "Handwritten\nSoA",
+    }
+
+    wanted_labels = [label for _, labels in groups for label in labels]
+    df = df[df["label"].isin(wanted_labels)].copy()
 
     if df.empty:
         raise SystemExit("No matching handcoded benchmark rows found.")
 
-    display_labels = {
-        "APRIL AoS scalar": "APRIL\nAoS scalar",
-        "Handwritten AoS scalar": "Handwritten\nAoS scalar",
-        "APRIL SoA scalar": "APRIL\nSoA scalar",
-        "Handwritten SoA scalar": "Handwritten\nSoA scalar",
-        "APRIL SoA SIMD": "APRIL\nSoA SIMD",
-        "APRIL AoSoA SIMD": "APRIL\nAoSoA SIMD",
-        "Handwritten SoA 2D SIMD": "Handwritten\nSoA SIMD",
+    values_by_label = {
+        str(row["label"]): float(row["real_time"])
+        for _, row in df.iterrows()
     }
 
-    x_labels = [display_labels[str(label)] for label in df["label"]]
+    x_positions: list[float] = []
+    x_labels: list[str] = []
+    y_values: list[float] = []
+    group_centers: list[float] = []
+    group_labels: list[str] = []
 
-    plt.figure(figsize=(8.8, 4.6))
-    bars = plt.bar(x_labels, df["real_time"])
+    x = 0.0
+    inner_gap = 1.0
+    group_gap = 0.9
 
-    plt.ylabel("Total time [ms]")
-    plt.title("APRIL direct-sum benchmark vs handwritten kernels")
-    plt.grid(axis="y", alpha=0.3)
+    for group_name, labels in groups:
+        group_start = x
+
+        for label in labels:
+            if label not in values_by_label:
+                continue
+
+            x_positions.append(x)
+            x_labels.append(display_labels[label])
+            y_values.append(values_by_label[label])
+            x += inner_gap
+
+        group_end = x - inner_gap
+        if group_end >= group_start:
+            group_centers.append((group_start + group_end) / 2.0)
+            group_labels.append(group_name)
+
+        x += group_gap
+
+    plt.figure(figsize=(8.8, 4.8))
+    ax = plt.gca()
+
+    bars = ax.bar(x_positions, y_values, width=0.72)
+
+    ax.set_ylabel("Total time [ms]", fontsize=12)
+    ax.set_title("APRIL direct-sum benchmark vs handwritten kernels", fontsize=13)
+    ax.grid(axis="y", alpha=0.3)
+
+    ax.set_xticks(x_positions)
+    ax.set_xticklabels(x_labels, fontsize=10)
+
+    # Group labels below the x tick labels.
+    for center, group_name in zip(group_centers, group_labels):
+        ax.text(
+            center,
+            -0.16,
+            group_name,
+            ha="center",
+            va="top",
+            transform=ax.get_xaxis_transform(),
+            fontsize=11,
+        )
+
+    # Subtle separators between groups.
+    for i in range(len(group_centers) - 1):
+        boundary = (group_centers[i] + group_centers[i + 1]) / 2.0
+        ax.axvline(boundary, color="black", linewidth=0.6, alpha=0.15)
 
     # Annotate bars with rounded times.
-    for bar, value in zip(bars, df["real_time"]):
-        plt.text(
+    for bar, value in zip(bars, y_values):
+        ax.text(
             bar.get_x() + bar.get_width() / 2.0,
             bar.get_height(),
             f"{value:.0f}",
@@ -106,6 +174,9 @@ def main() -> int:
             va="bottom",
             fontsize=9,
         )
+
+    # Leave room for group labels below the axis.
+    plt.subplots_adjust(bottom=0.24)
 
     savefig(out_dir, "april_handcoded_total_time")
 

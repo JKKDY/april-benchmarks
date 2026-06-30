@@ -7,11 +7,23 @@ set -euo pipefail
 #   results/lammps/<config>/<benchmark>/<scenario>/<time>/
 #
 # Usage:
-#   scripts/run_lammps_suite.sh [--only force|argon|both] [config]
+#   scripts/run_lammps_suite.sh [--only force|argon|strong|weak|both] [config]
 #
 # Default:
 #   scripts/run_lammps_suite.sh
-#     uses openmp-native and runs both benchmarks
+#       uses openmp-native
+#       runs both force kernel and argon block
+#
+# Repeat controls:
+#   LAMMPS_FORCE_REPEATS=3
+#   LAMMPS_ARGON_REPEATS=3
+#
+# Optional split repeat controls:
+#   LAMMPS_STRONG_REPEATS=3
+#   LAMMPS_WEAK_REPEATS=3
+#
+# If LAMMPS_STRONG_REPEATS / LAMMPS_WEAK_REPEATS are unset, they inherit
+# LAMMPS_ARGON_REPEATS.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -22,7 +34,7 @@ LAMMPS_FORCE_RUN="${PROJECT_ROOT}/engines/lammps/run_force_kernel.sh"
 usage() {
     cat >&2 <<EOF
 Usage:
-  $0 [--only force|argon|both] [config]
+  $0 [--only force|argon|strong|weak|both] [config]
 
 Default:
   $0
@@ -30,7 +42,12 @@ Default:
       runs both force kernel and argon block
 
 Options:
-  --only WHAT           choose benchmark subset: force, argon, both
+  --only WHAT           choose benchmark subset
+                        force   force-kernel benchmark only
+                        argon   strong and weak argon sweeps
+                        strong  strong argon sweep only
+                        weak    weak argon sweep only
+                        both    force plus strong and weak argon sweeps
                         default: both
 
 Config examples:
@@ -45,7 +62,15 @@ Examples:
   $0 intel-native
   $0 --only force intel-native
   $0 --only argon openmp-native
+  $0 --only strong openmp-native
+  $0 --only weak openmp-native
   $0 --only both intel-native
+
+Repeat overrides:
+  LAMMPS_FORCE_REPEATS=3
+  LAMMPS_ARGON_REPEATS=3
+  LAMMPS_STRONG_REPEATS=3
+  LAMMPS_WEAK_REPEATS=3
 
 Force-kernel overrides:
   FORCE_N=50
@@ -72,12 +97,31 @@ EOF
     exit 1
 }
 
+validate_positive_int() {
+    local name="$1"
+    local value="$2"
+
+    if [[ -z "$value" || "$value" == *[!0-9]* ]]; then
+        echo "$name must be a positive integer, got: $value" >&2
+        exit 1
+    fi
+
+    if (( value < 1 )); then
+        echo "$name must be >= 1, got: $value" >&2
+        exit 1
+    fi
+}
+
 ONLY="both"
 CONFIG="openmp-native"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --only)
+            if [[ $# -lt 2 ]]; then
+                echo "Missing value for --only" >&2
+                usage
+            fi
             ONLY="$2"
             shift 2
             ;;
@@ -96,11 +140,11 @@ while [[ $# -gt 0 ]]; do
 done
 
 case "$ONLY" in
-    force|argon|both)
+    force|argon|strong|weak|both)
         ;;
     *)
         echo "Unknown --only value: $ONLY" >&2
-        echo "Valid values: force argon both" >&2
+        echo "Valid values: force argon strong weak both" >&2
         exit 1
         ;;
 esac
@@ -113,6 +157,25 @@ case "$CONFIG" in
         usage
         ;;
 esac
+
+should_run() {
+    local target="$1"
+
+    case "$ONLY:$target" in
+        both:force|both:strong|both:weak)
+            return 0
+            ;;
+        argon:strong|argon:weak)
+            return 0
+            ;;
+        "$target":"$target")
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
 
 if [[ ! -x "$LAMMPS_ARGON_RUN" ]]; then
     echo "LAMMPS argon run script not found or not executable: $LAMMPS_ARGON_RUN" >&2
@@ -133,34 +196,58 @@ fi
 
 SUITE_TIME="${SUITE_TIME:-$(date +%Y%m%d_%H%M%S)}"
 
+LAMMPS_FORCE_REPEATS="${LAMMPS_FORCE_REPEATS:-1}"
+LAMMPS_ARGON_REPEATS="${LAMMPS_ARGON_REPEATS:-1}"
+LAMMPS_STRONG_REPEATS="${LAMMPS_STRONG_REPEATS:-$LAMMPS_ARGON_REPEATS}"
+LAMMPS_WEAK_REPEATS="${LAMMPS_WEAK_REPEATS:-$LAMMPS_ARGON_REPEATS}"
+
+validate_positive_int "LAMMPS_FORCE_REPEATS" "$LAMMPS_FORCE_REPEATS"
+validate_positive_int "LAMMPS_ARGON_REPEATS" "$LAMMPS_ARGON_REPEATS"
+validate_positive_int "LAMMPS_STRONG_REPEATS" "$LAMMPS_STRONG_REPEATS"
+validate_positive_int "LAMMPS_WEAK_REPEATS" "$LAMMPS_WEAK_REPEATS"
+
 echo "Running LAMMPS benchmark suite"
-echo "  config:     $CONFIG"
-echo "  only:       $ONLY"
-echo "  suite time: $SUITE_TIME"
-echo "  project:    $PROJECT_ROOT"
+echo "  config:          $CONFIG"
+echo "  only:            $ONLY"
+echo "  suite time:      $SUITE_TIME"
+echo "  project:         $PROJECT_ROOT"
+echo "  force repeats:   $LAMMPS_FORCE_REPEATS"
+echo "  strong repeats:  $LAMMPS_STRONG_REPEATS"
+echo "  weak repeats:    $LAMMPS_WEAK_REPEATS"
 echo
 
 # ------------------------------------------------------------------------------
 # 1. Force-kernel benchmark
 # ------------------------------------------------------------------------------
 
-if [[ "$ONLY" == "force" || "$ONLY" == "both" ]]; then
+if should_run force; then
     FORCE_N="${FORCE_N:-50}"
     FORCE_STEPS="${FORCE_STEPS:-100}"
 
     echo "============================================================"
     echo "Running force_kernel_bench"
     echo "============================================================"
-    echo "  n:      $FORCE_N"
-    echo "  steps:  $FORCE_STEPS"
+    echo "  repeats: $LAMMPS_FORCE_REPEATS"
+    echo "  n:       $FORCE_N"
+    echo "  steps:   $FORCE_STEPS"
     echo
 
-    SCENARIO="n${FORCE_N}_singlecore_steps${FORCE_STEPS}" \
-    RUN_ID="$SUITE_TIME" \
-    "$LAMMPS_FORCE_RUN" \
-        --config "$CONFIG" \
-        --n "$FORCE_N" \
-        --steps "$FORCE_STEPS"
+    for R in $(seq 1 "$LAMMPS_FORCE_REPEATS"); do
+        RUN_ID="${SUITE_TIME}_force_rep${R}"
+
+        echo "------------------------------------------------------------"
+        echo "Running force_kernel_bench"
+        echo "  repeat: $R"
+        echo "  run id: $RUN_ID"
+        echo "------------------------------------------------------------"
+
+        SCENARIO="n${FORCE_N}_singlecore_steps${FORCE_STEPS}" \
+        RUN_ID="$RUN_ID" \
+        "$LAMMPS_FORCE_RUN" \
+            --config "$CONFIG" \
+            --n "$FORCE_N" \
+            --steps "$FORCE_STEPS"
+    done
 else
     echo "Skipping force_kernel_bench because --only=$ONLY"
 fi
@@ -169,7 +256,7 @@ fi
 # 2. Argon block scaling sweeps
 # ------------------------------------------------------------------------------
 
-if [[ "$ONLY" == "argon" || "$ONLY" == "both" ]]; then
+if should_run strong || should_run weak; then
     ARGON_N="${ARGON_N:-100}"
     ARGON_WEAK_BASE_N="${ARGON_WEAK_BASE_N:-32}"
 
@@ -208,7 +295,6 @@ if [[ "$ONLY" == "argon" || "$ONLY" == "both" ]]; then
         local threads="$2"
 
         python3 - "$base_n" "$threads" <<'PY'
-import math
 import sys
 
 base_n = int(sys.argv[1])
@@ -231,14 +317,17 @@ PY
                 ;;
             hybrid)
                 local ranks="$LAMMPS_HYBRID_RANKS"
+
                 if (( ranks < 1 )); then
                     ranks=1
                 fi
+
                 if (( ranks > total )); then
                     ranks="$total"
                 fi
 
                 local threads=$((total / ranks))
+
                 if (( threads < 1 )); then
                     threads=1
                 fi
@@ -252,9 +341,10 @@ PY
         local scaling="$1"
         local n="$2"
         local total_cores="$3"
+        local repeat="$4"
 
         local particles=$((n * n * n))
-        local ranks threads tag scenario
+        local ranks threads tag scenario run_id
 
         read -r ranks threads < <(choose_lammps_layout "$total_cores")
 
@@ -279,10 +369,12 @@ PY
         fi
 
         scenario="${scaling}_n${n}_p${particles}_rho${ARGON_RHO}_dt${ARGON_DT}_steps${ARGON_STEPS}_${LAMMPS_MPI_RANKS_MODE}_r${ranks}_t${threads}_bind${LAMMPS_BIND}"
+        run_id="${SUITE_TIME}_${scaling}_rep${repeat}"
 
         echo "------------------------------------------------------------"
         echo "Running argon_block"
         echo "  scaling:     $scaling"
+        echo "  repeat:      $repeat"
         echo "  tag:         $tag"
         echo "  n:           $n"
         echo "  particles:   $particles"
@@ -292,10 +384,11 @@ PY
         echo "  bind:        $LAMMPS_BIND"
         echo "  mode:        $LAMMPS_MPI_RANKS_MODE"
         echo "  scenario:    $scenario"
+        echo "  run id:      $run_id"
         echo "------------------------------------------------------------"
 
         SCENARIO="$scenario" \
-        RUN_ID="$SUITE_TIME" \
+        RUN_ID="$run_id" \
         "$LAMMPS_ARGON_RUN" \
             --config "$CONFIG" \
             --n "$n" \
@@ -307,40 +400,54 @@ PY
             --bind "$LAMMPS_BIND"
     }
 
-    echo
-    echo "============================================================"
-    echo "Running argon_block strong scaling sweep"
-    echo "============================================================"
-    echo "  fixed n:   $ARGON_N"
-    echo "  rho:       $ARGON_RHO"
-    echo "  dt:        $ARGON_DT"
-    echo "  steps:     $ARGON_STEPS"
-    echo "  mode:      $LAMMPS_MPI_RANKS_MODE"
-    echo "  bind:      $LAMMPS_BIND"
-    echo "  cores:     ${ARGON_THREADS[*]}"
-    echo
+    if should_run strong; then
+        echo
+        echo "============================================================"
+        echo "Running argon_block strong scaling sweep"
+        echo "============================================================"
+        echo "  repeats:   $LAMMPS_STRONG_REPEATS"
+        echo "  fixed n:   $ARGON_N"
+        echo "  rho:       $ARGON_RHO"
+        echo "  dt:        $ARGON_DT"
+        echo "  steps:     $ARGON_STEPS"
+        echo "  mode:      $LAMMPS_MPI_RANKS_MODE"
+        echo "  bind:      $LAMMPS_BIND"
+        echo "  cores:     ${ARGON_THREADS[*]}"
+        echo
 
-    for T in "${ARGON_THREADS[@]}"; do
-        run_argon_once "strong" "$ARGON_N" "$T"
-    done
+        for R in $(seq 1 "$LAMMPS_STRONG_REPEATS"); do
+            for T in "${ARGON_THREADS[@]}"; do
+                run_argon_once "strong" "$ARGON_N" "$T" "$R"
+            done
+        done
+    else
+        echo "Skipping strong scaling because --only=$ONLY"
+    fi
 
-    echo
-    echo "============================================================"
-    echo "Running argon_block weak scaling sweep"
-    echo "============================================================"
-    echo "  base n @ 1 core: $ARGON_WEAK_BASE_N"
-    echo "  rho:             $ARGON_RHO"
-    echo "  dt:              $ARGON_DT"
-    echo "  steps:           $ARGON_STEPS"
-    echo "  mode:            $LAMMPS_MPI_RANKS_MODE"
-    echo "  bind:            $LAMMPS_BIND"
-    echo "  cores:           ${ARGON_THREADS[*]}"
-    echo
+    if should_run weak; then
+        echo
+        echo "============================================================"
+        echo "Running argon_block weak scaling sweep"
+        echo "============================================================"
+        echo "  repeats:          $LAMMPS_WEAK_REPEATS"
+        echo "  base n @ 1 core:  $ARGON_WEAK_BASE_N"
+        echo "  rho:              $ARGON_RHO"
+        echo "  dt:               $ARGON_DT"
+        echo "  steps:            $ARGON_STEPS"
+        echo "  mode:             $LAMMPS_MPI_RANKS_MODE"
+        echo "  bind:             $LAMMPS_BIND"
+        echo "  cores:            ${ARGON_THREADS[*]}"
+        echo
 
-    for T in "${ARGON_THREADS[@]}"; do
-        N_WEAK="$(weak_n_for_threads "$ARGON_WEAK_BASE_N" "$T")"
-        run_argon_once "weak" "$N_WEAK" "$T"
-    done
+        for R in $(seq 1 "$LAMMPS_WEAK_REPEATS"); do
+            for T in "${ARGON_THREADS[@]}"; do
+                N_WEAK="$(weak_n_for_threads "$ARGON_WEAK_BASE_N" "$T")"
+                run_argon_once "weak" "$N_WEAK" "$T" "$R"
+            done
+        done
+    else
+        echo "Skipping weak scaling because --only=$ONLY"
+    fi
 else
     echo "Skipping argon_block because --only=$ONLY"
 fi

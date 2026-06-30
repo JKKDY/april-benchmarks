@@ -21,7 +21,7 @@ set(APRIL_BUILD_BENCHMARKS OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
     April
     GIT_REPOSITORY https://github.com/JKKDY/april.git
-    GIT_TAG dev
+    GIT_TAG 1dea28e6ab376f965ec73b2294dad8456cc8e238
 )
 FetchContent_MakeAvailable(April)
 

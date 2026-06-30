@@ -1,0 +1,84 @@
+Engine: LAMMPS
+Config: intel-native
+Benchmark: argon_block
+Scenario: weak_n40_p64000_rho0.8442_dt0.005_steps500_threads_r1_t2_bindclose
+Run ID: 20260630_024117_weak_rep2
+Run Date: 2026-06-30T03:21:59+02:00
+Hostname: cm4r15c06s04
+Project Root: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks
+Result Dir: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/intel-native/argon_block/weak_n40_p64000_rho0.8442_dt0.005_steps500_threads_r1_t2_bindclose/20260630_024117_weak_rep2
+Working Dir: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/intel-native/argon_block/weak_n40_p64000_rho0.8442_dt0.005_steps500_threads_r1_t2_bindclose/20260630_024117_weak_rep2
+LAMMPS Binary: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-intel-native/install/bin/lmp
+Input File: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/engines/lammps/argon_block.in
+Datafile: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/intel-native/argon_block/weak_n40_p64000_rho0.8442_dt0.005_steps500_threads_r1_t2_bindclose/20260630_024117_weak_rep2/argon_grid_n40_rho0.8442.data
+n_dim: 40
+rho: 0.8442
+steps: 500
+dt: 0.005
+ranks: 1
+threads: 2
+bind: close
+Command: mpirun -np 1 /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-intel-native/install/bin/lmp -in /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/engines/lammps/argon_block.in -var datafile /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/intel-native/argon_block/weak_n40_p64000_rho0.8442_dt0.005_steps500_threads_r1_t2_bindclose/20260630_024117_weak_rep2/argon_grid_n40_rho0.8442.data -var rho 0.8442 -var n 40 -var steps 500 -var dt 0.005 -sf intel -pk intel 2 mode double 
+Benchmark Repo Commit: unknown
+
+Environment:
+  OMP_NUM_THREADS=2
+  OMP_PLACES=cores
+  OMP_PROC_BIND=close
+  OMP_DYNAMIC=FALSE
+  KMP_AFFINITY=granularity=fine,compact,1,0
+  KMP_BLOCKTIME=0
+  SLURM_JOB_ID=370913
+  SLURM_CPUS_PER_TASK=unset
+
+Build Info:
+Engine: LAMMPS
+Config: intel-native
+Build Date: 2026-06-28T12:11:02+02:00
+Project Root: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks
+Build Dir: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-intel-native
+Install Dir: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-intel-native/install
+CC: /dss/lrzsys/sys/spack/release/24.4.0/opt/x86_64/intel-oneapi-mpi/2021.12.0-gcc-dz4gyjq/mpi/2021.12/bin/mpiicx
+CXX: /dss/lrzsys/sys/spack/release/24.4.0/opt/x86_64/intel-oneapi-mpi/2021.12.0-gcc-dz4gyjq/mpi/2021.12/bin/mpiicpx
+Extra C Flags: -O3 -DNDEBUG -xHost -qopenmp -qopt-zmm-usage=high -fp-model=fast
+Extra CXX Flags: -O3 -DNDEBUG -xHost -qopenmp -qopt-zmm-usage=high -fp-model=fast
+CMAKE_BUILD_TYPE: Release
+BUILD_MPI: ON
+BUILD_OMP: ON
+PKG_OPENMP: ON
+PKG_INTEL: ON
+INTEL_ARCH: cpu
+INTEL_LRT_MODE: none
+LAMMPS_FP_MODEL: fast
+Runtime Hint: Run either as 1 MPI rank + threads (-sf intel) or many MPI ranks (-sf intel)
+CMake: cmake version 3.30.0
+Ninja: 1.12.1
+LAMMPS Source Dir: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/external/lammps
+LAMMPS Commit: unknown
+Benchmark Repo Commit: unknown
+
+Wall Time Seconds: 6.137878
+Exit Status: 0
+config=intel-native
+benchmark=argon_block
+scenario=weak_n40_p64000_rho0.8442_dt0.005_steps500_threads_r1_t2_bindclose
+run_id=20260630_024117_weak_rep2
+n_dim=40
+atoms=64000
+rho=0.8442
+steps=500
+dt=0.005
+ranks=1
+threads=2
+bind=close
+loop_time_s=4.32612
+timesteps_per_second=unknown
+matom_step_per_second=7.397
+cpu_use_percent=173.5%
+pair_time_s=2.7965
+neigh_time_s=0.80498
+comm_time_s=0.26681
+modify_time_s=0.33917
+total_neighbors=2413123
+neighbor_list_builds=79
+wall_time_s=6.137878

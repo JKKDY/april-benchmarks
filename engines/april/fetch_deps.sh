@@ -3,19 +3,19 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-
 EXTERNAL_DIR="${PROJECT_ROOT}/external"
 
 APRIL_REPO="${APRIL_REPO:-https://github.com/JKKDY/april.git}"
-APRIL_REF="${APRIL_REF:-dev}"
-APRIL_DIR="${EXTERNAL_DIR}/april"
+APRIL_REF="${APRIL_REF:-1dea28e6ab376f965ec73b2294dad8456cc8e238}" 
 
 GBENCH_REPO="${GBENCH_REPO:-https://github.com/google/benchmark.git}"
 GBENCH_REF="${GBENCH_REF:-v1.8.3}"
-GBENCH_DIR="${EXTERNAL_DIR}/googlebenchmark"
 
 XSIMD_REPO="${XSIMD_REPO:-https://github.com/xtensor-stack/xsimd.git}"
 XSIMD_REF="${XSIMD_REF:-master}"
+
+APRIL_DIR="${EXTERNAL_DIR}/april"
+GBENCH_DIR="${EXTERNAL_DIR}/googlebenchmark"
 XSIMD_DIR="${EXTERNAL_DIR}/xsimd"
 
 mkdir -p "$EXTERNAL_DIR"
@@ -39,7 +39,8 @@ fetch_repo() {
 
     git -C "$dir" fetch --tags --prune
     git -C "$dir" checkout "$ref"
-
+    
+    echo "$name requested ref: $ref"
     echo "$name commit: $(git -C "$dir" rev-parse HEAD)"
 }
 
@@ -54,15 +55,21 @@ INFO_FILE="${EXTERNAL_DIR}/dependency_info.txt"
     echo
     echo "April:"
     echo "  Repo: $APRIL_REPO"
-    echo "  Ref: $APRIL_REF"
+    echo "  Requested Ref: $APRIL_REF"
     echo "  Commit: $(git -C "$APRIL_DIR" rev-parse HEAD)"
     echo
     echo "Google Benchmark:"
     echo "  Repo: $GBENCH_REPO"
     echo "  Ref: $GBENCH_REF"
     echo "  Commit: $(git -C "$GBENCH_DIR" rev-parse HEAD)"
+    echo
+    echo "xsimd:"
+    echo "  Repo: $XSIMD_REPO"
+    echo "  Ref: $XSIMD_REF"
+    echo "  Commit: $(git -C "$XSIMD_DIR" rev-parse HEAD)"
 } > "$INFO_FILE"
 
 echo
-echo "Dependencies fetched."
+echo "Dependencies fetched and pinned."
+echo "April is pinned to: $APRIL_REF"
 echo "Info written to: $INFO_FILE"

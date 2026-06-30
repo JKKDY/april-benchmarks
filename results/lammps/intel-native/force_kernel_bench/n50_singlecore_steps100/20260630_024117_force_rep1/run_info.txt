@@ -1,0 +1,70 @@
+Engine: LAMMPS
+Config: intel-native
+Benchmark: force_kernel_bench
+Scenario: n50_singlecore_steps100
+Run ID: 20260630_024117_force_rep1
+Run Date: 2026-06-30T02:41:17+02:00
+Hostname: cm4r15c06s04
+Project Root: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks
+Result Dir: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/intel-native/force_kernel_bench/n50_singlecore_steps100/20260630_024117_force_rep1
+Working Dir: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/intel-native/force_kernel_bench/n50_singlecore_steps100/20260630_024117_force_rep1
+LAMMPS Binary: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-intel-native/install/bin/lmp
+Input File: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/engines/lammps/force_kernel_bench.in
+Datafile: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/intel-native/force_kernel_bench/n50_singlecore_steps100/20260630_024117_force_rep1/force_kernel_grid_n50.data
+n_dim: 50
+steps: 100
+ranks: 1
+threads: 1
+Command: mpirun -np 1 /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-intel-native/install/bin/lmp -in /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/engines/lammps/force_kernel_bench.in -var datafile /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/intel-native/force_kernel_bench/n50_singlecore_steps100/20260630_024117_force_rep1/force_kernel_grid_n50.data -var n_dim 50 -var steps 100 -sf intel -pk intel 1 
+Benchmark Repo Commit: unknown
+
+Environment:
+  OMP_NUM_THREADS=1
+  OMP_DYNAMIC=FALSE
+  OMP_PLACES=unset
+  OMP_PROC_BIND=unset
+  KMP_AFFINITY=granularity=fine,compact,1,0
+  KMP_BLOCKTIME=0
+  SLURM_JOB_ID=370913
+  SLURM_CPUS_PER_TASK=unset
+
+Build Info:
+Engine: LAMMPS
+Config: intel-native
+Build Date: 2026-06-28T12:11:02+02:00
+Project Root: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks
+Build Dir: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-intel-native
+Install Dir: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-intel-native/install
+CC: /dss/lrzsys/sys/spack/release/24.4.0/opt/x86_64/intel-oneapi-mpi/2021.12.0-gcc-dz4gyjq/mpi/2021.12/bin/mpiicx
+CXX: /dss/lrzsys/sys/spack/release/24.4.0/opt/x86_64/intel-oneapi-mpi/2021.12.0-gcc-dz4gyjq/mpi/2021.12/bin/mpiicpx
+Extra C Flags: -O3 -DNDEBUG -xHost -qopenmp -qopt-zmm-usage=high -fp-model=fast
+Extra CXX Flags: -O3 -DNDEBUG -xHost -qopenmp -qopt-zmm-usage=high -fp-model=fast
+CMAKE_BUILD_TYPE: Release
+BUILD_MPI: ON
+BUILD_OMP: ON
+PKG_OPENMP: ON
+PKG_INTEL: ON
+INTEL_ARCH: cpu
+INTEL_LRT_MODE: none
+LAMMPS_FP_MODEL: fast
+Runtime Hint: Run either as 1 MPI rank + threads (-sf intel) or many MPI ranks (-sf intel)
+CMake: cmake version 3.30.0
+Ninja: 1.12.1
+LAMMPS Source Dir: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/external/lammps
+LAMMPS Commit: unknown
+Benchmark Repo Commit: unknown
+
+Wall Time Seconds: 3.326463
+Exit Status: 0
+config=intel-native
+benchmark=force_kernel_bench
+scenario=n50_singlecore_steps100
+run_id=20260630_024117_force_rep1
+n_dim=50
+atoms=125000
+steps=100
+pair_time_s=1.6018
+neighbors_per_step=4712572
+ns_per_interaction=3.39899316
+interactions_per_second=294204770
+wall_time_s=3.326463

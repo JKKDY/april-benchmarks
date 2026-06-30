@@ -13,7 +13,7 @@ To build all targets run:
 
 
 ```
-./engines/april/build.sh
+./engines/april/build.sh all
 ```
 
 
@@ -30,7 +30,7 @@ LAMMPS is used as a comparison to April. To fetch dependencies and build run:
 
 ```
 ./engines/lammps/fetch_deps.sh && 
-./engines/lammps/build.sh
+./engines/lammps/build.sh all 
 ```
 
 This will create lammps executables with openMP and Intel package respectively. 

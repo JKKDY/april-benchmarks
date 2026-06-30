@@ -1,0 +1,67 @@
+Engine: LAMMPS
+Config: openmp-native
+Benchmark: force_kernel_bench
+Scenario: n50_singlecore_steps100
+Run ID: 20260630_013656_force_rep1
+Run Date: 2026-06-30T01:36:56+02:00
+Hostname: cm4r15c06s04
+Project Root: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks
+Result Dir: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/openmp-native/force_kernel_bench/n50_singlecore_steps100/20260630_013656_force_rep1
+Working Dir: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/openmp-native/force_kernel_bench/n50_singlecore_steps100/20260630_013656_force_rep1
+LAMMPS Binary: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-openmp-native/install/bin/lmp
+Input File: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/engines/lammps/force_kernel_bench.in
+Datafile: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/openmp-native/force_kernel_bench/n50_singlecore_steps100/20260630_013656_force_rep1/force_kernel_grid_n50.data
+n_dim: 50
+steps: 100
+ranks: 1
+threads: 1
+Command: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-openmp-native/install/bin/lmp -in /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/engines/lammps/force_kernel_bench.in -var datafile /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/openmp-native/force_kernel_bench/n50_singlecore_steps100/20260630_013656_force_rep1/force_kernel_grid_n50.data -var n_dim 50 -var steps 100 -sf omp -pk omp 1 
+Benchmark Repo Commit: unknown
+
+Environment:
+  OMP_NUM_THREADS=1
+  OMP_DYNAMIC=FALSE
+  OMP_PLACES=unset
+  OMP_PROC_BIND=unset
+  KMP_AFFINITY=unset
+  KMP_BLOCKTIME=unset
+  SLURM_JOB_ID=370913
+  SLURM_CPUS_PER_TASK=unset
+
+Build Info:
+Engine: LAMMPS
+Config: openmp-native
+Build Date: 2026-06-28T12:10:33+02:00
+Project Root: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks
+Build Dir: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-openmp-native
+Install Dir: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-openmp-native/install
+CC: /lrz/sys/compilers/llvm/20.1.2/bin/clang
+CXX: /lrz/sys/compilers/llvm/20.1.2/bin/clang++
+Extra C Flags: -O3 -DNDEBUG -fno-math-errno -ffast-math -fopenmp -march=native
+Extra CXX Flags: -O3 -DNDEBUG -fno-math-errno -ffast-math -fopenmp -march=native
+CMAKE_BUILD_TYPE: Release
+BUILD_MPI: OFF
+BUILD_OMP: ON
+PKG_OPENMP: ON
+PKG_INTEL: OFF
+Runtime Hint: Run with 1 process, threads, -sf omp
+CMake: cmake version 3.30.0
+Ninja: 1.12.1
+LAMMPS Source Dir: /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/external/lammps
+LAMMPS Commit: unknown
+Benchmark Repo Commit: unknown
+
+Wall Time Seconds: 2.399081
+Exit Status: 0
+config=openmp-native
+benchmark=force_kernel_bench
+scenario=n50_singlecore_steps100
+run_id=20260630_013656_force_rep1
+n_dim=50
+atoms=125000
+steps=100
+pair_time_s=1.9234
+neighbors_per_step=4712572
+ns_per_interaction=4.08142305
+interactions_per_second=245012582
+wall_time_s=2.399081

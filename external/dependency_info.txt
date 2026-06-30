@@ -1,11 +1,16 @@
-Dependency Fetch Date: 2026-04-21T19:56:07+02:00
+Dependency Fetch Date: 2026-06-27T16:45:43+02:00
 
 April:
   Repo: https://github.com/JKKDY/april.git
-  Ref: dev
-  Commit: 27afb645e5d251c4e8aa1474fc74289338b003de
+  Requested Ref: 1dea28e6ab376f965ec73b2294dad8456cc8e238
+  Commit: 1dea28e6ab376f965ec73b2294dad8456cc8e238
 
 Google Benchmark:
   Repo: https://github.com/google/benchmark.git
   Ref: v1.8.3
   Commit: 344117638c8ff7e239044fd0fa7085839fc03021
+
+xsimd:
+  Repo: https://github.com/xtensor-stack/xsimd.git
+  Ref: master
+  Commit: e79f9d36c04b88fd902307c338527b73e77882c9

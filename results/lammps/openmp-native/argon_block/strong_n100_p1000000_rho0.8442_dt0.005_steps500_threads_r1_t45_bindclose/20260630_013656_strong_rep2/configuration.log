@@ -1,0 +1,16 @@
+config=openmp-native
+benchmark=argon_block
+scenario=strong_n100_p1000000_rho0.8442_dt0.005_steps500_threads_r1_t45_bindclose
+run_id=20260630_013656_strong_rep2
+n_dim=100
+atoms=1000000
+rho=0.8442
+steps=500
+dt=0.005
+ranks=1
+threads=45
+bind=close
+datafile=/dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/openmp-native/argon_block/strong_n100_p1000000_rho0.8442_dt0.005_steps500_threads_r1_t45_bindclose/20260630_013656_strong_rep2/argon_grid_n100_rho0.8442.data
+input_file=/dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/engines/lammps/argon_block.in
+lammps_bin=/dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-openmp-native/install/bin/lmp
+command=/dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/lammps-openmp-native/install/bin/lmp -in /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/engines/lammps/argon_block.in -var datafile /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/openmp-native/argon_block/strong_n100_p1000000_rho0.8442_dt0.005_steps500_threads_r1_t45_bindclose/20260630_013656_strong_rep2/argon_grid_n100_rho0.8442.data -var rho 0.8442 -var n 100 -var steps 500 -var dt 0.005 -sf omp -pk omp 45 

@@ -1,4 +1,4 @@
-Dependency Fetch Date: 2026-04-22T16:27:42+02:00
+Dependency Fetch Date: 2026-06-27T16:32:16+02:00
 LAMMPS Repo: https://github.com/lammps/lammps.git
 LAMMPS Ref: stable
 LAMMPS Commit: 611ca3b7f8525ba802373b04f9e3d632d515f7e3

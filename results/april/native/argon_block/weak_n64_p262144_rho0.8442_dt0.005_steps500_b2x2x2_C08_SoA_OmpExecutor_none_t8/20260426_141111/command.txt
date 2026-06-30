@@ -1,1 +1,0 @@
-/dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/build/april-native/bin/argon_block 64 0.8442 0.005 8 500 2 2 2 C08 SoA OmpExecutor none weak_scaling 

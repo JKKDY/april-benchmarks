@@ -8,40 +8,34 @@ export ARGON_THREADS="${ARGON_THREADS:-1 2 3 4 6 8 11 16 23 32 37 45 50 56}"
 # APRIL
 # -------------------------
 
-./scripts/run_april_suite.sh native
-./scripts/run_april_suite.sh native-novec
-./scripts/run_april_suite.sh native-gcc
+GB_REPETITIONS=10 \
+GB_AGGREGATES_ONLY=false \
+./scripts/run_april_suite.sh --only force native-novec
 
-ARGON_EXECUTOR=NativeSpinExecutor ./scripts/run_april_suite.sh native
-ARGON_ORDERING=none ./scripts/run_april_suite.sh native
+# GB_REPETITIONS=10 \
+# GB_AGGREGATES_ONLY=false \
+# ./scripts/run_april_suite.sh --only hardcoded native
 
-ARGON_LAYOUT=AoS ./scripts/run_april_suite.sh native
-ARGON_LAYOUT=AoSoA ./scripts/run_april_suite.sh native
+# ARGON_DT=0.005 \
+# ARGON_STRONG_REPEATS=3 \
+# ./scripts/run_april_suite.sh --only strong native
 
-./scripts/run_april_suite.sh native # running a second time to gauge variability
-
-ARGON_BX=4 ARGON_BY=4 ARGON_BZ=4 ./scripts/run_april_suite.sh native
-ARGON_DT=0.0000001 ./scripts/run_april_suite.sh native
-
-ARGON_STEPS=200 ARGON_N=160 ./scripts/run_april_suite.sh native
+# ARGON_DT=0.0000001 \
+# ARGON_STRONG_REPEATS=3 \
+# ./scripts/run_april_suite.sh --only strong native
 
 # -------------------------
 # LAMMPS
 # -------------------------
 
+# LAMMPS_FORCE_REPEATS=3 \
+# LAMMPS_ARGON_REPEATS=3 \
+# ./scripts/run_lammps_suite.sh --only both openmp-native
 
-./scripts/run_lammps_suite.sh openmp-generic
-./scripts/run_lammps_suite.sh openmp-native
-./scripts/run_lammps_suite.sh openmp-native
-
-LAMMPS_MPI_RANKS_MODE=threads ./scripts/run_lammps_suite.sh intel-native
-LAMMPS_MPI_RANKS_MODE=mpi     ./scripts/run_lammps_suite.sh intel-native
-LAMMPS_MPI_RANKS_MODE=mpi     ./scripts/run_lammps_suite.sh intel-generic
-
-ARGON_DT=0.0000001 ./scripts/run_lammps_suite.sh openmp-native
-ARGON_DT=0.0000001 ./scripts/run_lammps_suite.sh intel-native
-
-ARGON_STEPS=200 ARGON_N=160 ./scripts/run_lammps_suite.sh openmp-generic
+# LAMMPS_FORCE_REPEATS=3 \
+# LAMMPS_ARGON_REPEATS=3 \
+# LAMMPS_MPI_RANKS_MODE=threads \
+# ./scripts/run_lammps_suite.sh --only both intel-native
 
 
 

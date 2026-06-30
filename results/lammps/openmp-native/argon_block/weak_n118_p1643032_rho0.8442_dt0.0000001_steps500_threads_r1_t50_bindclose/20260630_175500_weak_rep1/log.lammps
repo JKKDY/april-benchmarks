@@ -1,0 +1,182 @@
+LAMMPS (22 Jul 2025 - Update 4)
+  using 50 OpenMP thread(s) per MPI task
+package omp 50
+using multi-threaded neighbor list subroutines
+# ===================================================================
+# LAMMPS Argon Benchmark
+# Matches APRIL create_argon_environment()
+# Uses generated APRIL-style data file
+# ===================================================================
+
+# Expected command line:
+# -var datafile april_argon_100_rho0.8442.data
+# -var rho      0.8442
+# -var n        100
+# -var steps    500
+# -var dt       0.001
+
+units           lj
+atom_style      atomic
+boundary        p p p
+
+read_data       ${datafile}
+read_data       /dss/dssfs02/lwp-dss-0001/pr63so/pr63so-dss-0000/ge93qil2/april-benchmarks/results/lammps/openmp-native/argon_block/weak_n118_p1643032_rho0.8442_dt0.0000001_steps500_threads_r1_t50_bindclose/20260630_175500_weak_rep1/argon_grid_n118_rho0.8442.data
+Reading data file ...
+  orthogonal box = (-62.426679 -62.426679 -62.426679) to (62.426679 62.426679 62.426679)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  1643032 atoms
+  read_data CPU = 2.981 seconds
+
+variable        temperature equal 1.0
+variable        epsilon     equal 1.0
+variable        sigma       equal 1.0
+variable        rcut        equal 2.5*v_sigma
+
+variable        N       equal v_n*v_n*v_n
+variable        volume  equal v_N/v_rho
+variable        L       equal v_volume^(1.0/3.0)
+variable        spacing equal v_L/v_n
+
+mass            1 1.0
+
+velocity        all create ${temperature} 87287 loop geom
+velocity        all create 1 87287 loop geom
+
+pair_style      lj/cut ${rcut}
+pair_style      lj/cut 2.5
+pair_coeff      1 1 ${epsilon} ${sigma} ${rcut}
+pair_coeff      1 1 1 ${sigma} ${rcut}
+pair_coeff      1 1 1 1 ${rcut}
+pair_coeff      1 1 1 1 2.5
+
+neighbor        0.3 bin
+neigh_modify    every 1 delay 0 check yes
+
+fix             1 all nve
+timestep        ${dt}
+timestep        0.0000001
+
+thermo          1
+thermo_style    custom step atoms temp pe ke etotal press
+
+print "N        = ${N}"
+N        = 1643032
+print "atoms    = $(count(all))"
+atoms    = 1643032
+print "L        = ${L}"
+L        = 124.853357213919
+print "spacing  = ${spacing}"
+spacing  = 1.05807929842304
+print "rho      = ${rho}"
+rho      = 0.8442
+print "dt       = ${dt}"
+dt       = 0.0000001
+print "steps    = ${steps}"
+steps    = 500
+
+# Output initial geometry to cross-check with APRIL
+# dump            geom all custom 1 geom.lammpstrj id type x y z vx vy vz
+# dump_modify     geom sort id
+
+# Build state and print initial thermodynamics
+run             0
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Last active /omp style is pair_style lj/cut/omp
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 2.8
+  ghost atom cutoff = 2.8
+  binsize = 1.4, bins = 90 90 90
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair lj/cut/omp, perpetual
+      attributes: half, newton on, omp
+      pair build: half/bin/atomonly/newton/omp
+      stencil: half/bin/3d
+      bin: standard
+Per MPI rank memory allocation (min/avg/max) = 3460 | 3460 | 3460 Mbytes
+   Step        Atoms         Temp          PotEng         KinEng         TotEng         Press     
+         0     1643032   1             -5.2202185      1.4999991     -3.7202194      2.6664654    
+Loop time of 2.27e-06 on 50 procs for 0 steps with 1643032 atoms
+
+17489.0% CPU use with 1 MPI tasks x 50 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 2.27e-06   |            |       |100.00
+
+Nlocal:    1.64303e+06 ave 1.64303e+06 max 1.64303e+06 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:         263592 ave      263592 max      263592 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    6.57213e+07 ave 6.57213e+07 max 6.57213e+07 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 65721280
+Ave neighs/atom = 40
+Neighbor list builds = 0
+Dangerous builds = 0
+
+# Only enable this if the dump above is enabled.
+# undump          geom
+
+# Same warmup fraction as APRIL, but suppress per-step thermo output
+thermo          0
+variable        warmup_steps equal round(v_steps*0.1)
+run             ${warmup_steps} post no
+run             50 post no
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Last active /omp style is pair_style lj/cut/omp
+Per MPI rank memory allocation (min/avg/max) = 3460 | 3460 | 3460 Mbytes
+   Step        Atoms         Temp          PotEng         KinEng         TotEng         Press     
+         0     1643032   1             -5.2202185      1.4999991     -3.7202194      2.6664654    
+        50     1643032   0.99999999    -5.2202185      1.4999991     -3.7202194      2.6664654    
+Loop time of 2.35086 on 50 procs for 50 steps with 1643032 atoms
+
+
+# Timed benchmark region
+reset_timestep  0
+thermo          ${steps}
+thermo          500
+run             ${steps}
+run             500
+Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
+Last active /omp style is pair_style lj/cut/omp
+Per MPI rank memory allocation (min/avg/max) = 3460 | 3460 | 3460 Mbytes
+   Step        Atoms         Temp          PotEng         KinEng         TotEng         Press     
+         0     1643032   0.99999999    -5.2202185      1.4999991     -3.7202194      2.6664654    
+       500     1643032   0.99999906    -5.2202171      1.4999977     -3.7202194      2.6664707    
+Loop time of 23.0919 on 50 procs for 500 steps with 1643032 atoms
+
+Performance: 0.187 tau/day, 21.653 timesteps/s, 35.576 Matom-step/s
+4974.5% CPU use with 1 MPI tasks x 50 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 12.062     | 12.062     | 12.062     |   0.0 | 52.23
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 1.6302     | 1.6302     | 1.6302     |   0.0 |  7.06
+Output  | 0.0041121  | 0.0041121  | 0.0041121  |   0.0 |  0.02
+Modify  | 6.0738     | 6.0738     | 6.0738     |   0.0 | 26.30
+Other   |            | 3.322      |            |       | 14.39
+
+Nlocal:    1.64303e+06 ave 1.64303e+06 max 1.64303e+06 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:         263592 ave      263592 max      263592 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    6.57213e+07 ave 6.57213e+07 max 6.57213e+07 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 65721280
+Ave neighs/atom = 40
+Neighbor list builds = 0
+Dangerous builds = 0
+Total wall time: 0:00:30

@@ -1,9 +1,0 @@
-label,config,benchmark_case,container,layout,vector_policy,implementation,ns_per_interaction,interactions_per_second,run_id,speedup_vs_aos_scalar
-DirectSum AoS scalar,native,"BM_DirectSum_UpdateForcesOnly<Layout::AoS, VectorPolicy::Scalar>/4000/200",DirectSum,AoS,Scalar,scalar,3.291490442610653,303813733.45469826,20260426_131439,1.0
-DirectSum SoA scalar,native,"BM_DirectSum_UpdateForcesOnly<Layout::SoA, VectorPolicy::Scalar>/4000/200",DirectSum,SoA,Scalar,scalar,4.073512201175294,245488401.8050759,20260426_131439,0.8080227283131712
-DirectSum SoA SIMD,native,"BM_DirectSum_UpdateForcesOnly<Layout::SoA, VectorPolicy::Auto>/4000/200",DirectSum,SoA,Auto,april_auto_simd,0.940596075268814,1063155616.2024268,20260426_131439,3.4993665497381268
-DirectSum AoSoA SIMD,native,"BM_DirectSum_UpdateForcesOnly<Layout::AoSoA<>, VectorPolicy::Auto>/4000/200",DirectSum,AoSoA<,Auto,april_auto_simd,0.9235013684671156,1082835428.4518943,20260426_131439,3.564142463669622
-LinkedCells AoS scalar,native,"BM_LinkedCells_UpdateForcesOnly<Layout::AoS, VectorPolicy::Scalar>/50/25",LinkedCells,AoS,Scalar,scalar,3.3522068944419776,298310943.05605626,20260426_131439,1.0
-LinkedCells SoA scalar,native,"BM_LinkedCells_UpdateForcesOnly<Layout::SoA, VectorPolicy::Scalar>/50/25",LinkedCells,SoA,Scalar,scalar,4.13495794324585,241840428.3007101,20260426_131439,0.8106991511044414
-LinkedCells SoA SIMD,native,"BM_LinkedCells_UpdateForcesOnly<Layout::SoA, VectorPolicy::Auto>/50/25",LinkedCells,SoA,Auto,april_auto_simd,1.1228722019851145,890573297.8624907,20260426_131439,2.9853859491005696
-LinkedCells AoSoA SIMD,native,"BM_LinkedCells_UpdateForcesOnly<Layout::AoSoA<>, VectorPolicy::Auto>/50/25",LinkedCells,AoSoA<,Auto,april_auto_simd,1.079824637111808,926076295.7536198,20260426_131439,3.1043993434045722
